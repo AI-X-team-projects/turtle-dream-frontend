@@ -40,16 +40,16 @@ const TextStyle = styled.p`
   text-align: center;
 `;
 
-const SingUp = () => {
+const SignUp = () => {
   const navigate = useNavigate(); // navigate 훅 사용
-  const [gender, setGender] = useState("남"); //성별 선택
-  const [username, setUsername] = useState(""); //아이디 입력
-  const [password, setPassword] = useState(""); //비밀번호 입력
-  const [passwordCheck, SetPasswordCheck] = useState(""); //비밀번호 확인 입력
-  const [name, setName] = useState(""); //이름 입력
-  const [userNameAvailable, setUserNameAvailable] = useState(false); //아이디 중복 확인
-  const [age, setAge] = useState(""); //나이 입력
-  const [height, setHeight] = useState(""); //키 입력
+  const [gender, setGender] = useState("남"); // 성별 선택
+  const [username, setUsername] = useState(""); // 아이디 입력
+  const [password, setPassword] = useState(""); // 비밀번호 입력
+  const [passwordCheck, SetPasswordCheck] = useState(""); // 비밀번호 확인 입력
+  const [name, setName] = useState(""); // 이름 입력
+  const [userNameAvailable, setUserNameAvailable] = useState(false); // 아이디 중복 확인
+  const [age, setAge] = useState(""); // 나이 입력
+  const [height, setHeight] = useState(""); // 키 입력
 
   // 회원가입 요청
   const handleSignUp = async () => {
@@ -58,14 +58,8 @@ const SingUp = () => {
       return;
     }
     try {
-      const response = await userApi.register(
-        username,
-        password,
-        name,
-        gender,
-        age,
-        height
-      );
+      const userData = { username, password, name, gender, age, height }; // 파라미터 객체로 묶기
+      const response = await userApi.register(userData);
       alert("회원가입이 완료되었습니다.");
       navigate("/login"); // 로그인 페이지로 이동
     } catch (error) {
@@ -97,7 +91,7 @@ const SingUp = () => {
   const ButtonProps = {
     width: "50px",
     height: "50px",
-    fontSize: "16px;",
+    fontSize: "16px", // ; 제거
   };
 
   return (
@@ -183,4 +177,4 @@ const SingUp = () => {
   );
 };
 
-export default SingUp;
+export default SignUp;
