@@ -36,8 +36,20 @@ const TextStyle = styled.p`
 `;
 
 const Login = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginForm, setLoginForm] = useState({
+        username: '',
+        password: ''
+    });
     const navigate = useNavigate();
-
+    const onChange = (e) => {
+        const {name, value} = e.target;
+        setLoginForm({
+            ...loginForm,
+            [name]: value
+        });
+    }
     const goToSignUp = () => {
         navigate("/signup");
     }
@@ -48,13 +60,15 @@ const Login = () => {
             <CommonTextField
                 placeholder={"아이디"}
                 width={"346px"}
+                onChange={onChange}
             />
             <CommonTextField
                 type={"password"}
                 placeholder={"비밀번호"}
                 width={"346px"}
+                onChange={onChange}
             />
-            <CommonButton width={"346px"} children={"로그인"}/>
+            <CommonButton width={"346px"} children={loginForm} />
             <TextStyle>회원이 아닌신가요? <span onClick={goToSignUp}>회원가입</span></TextStyle>
         </Root>
     );

@@ -105,7 +105,7 @@ const SingUp = () => {
                 />
             </Box>
             <TextStyle>중복된 아이디가 있습니다.</TextStyle>
-            <CommonButton width={"346px"} children={"회원가입"}/>
+            <CommonButton width={"346px"} children={"register"}/>
         </Root>
     );
 };
