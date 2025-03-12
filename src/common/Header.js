@@ -17,6 +17,7 @@ const TextStyle = styled.p`
     font-size: ${(props) => props.theme.fontSize.base};
     color: ${(props) => props.theme.color.black};
     font-weight: 800;
+    
 `;
 
 const Header = () => {
