@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import Login from "./pages/login/Login";
 import Header from './common/Header';
 import theme from './theme/theme';
+import SingUp from "./pages/siginup/SignUp";
 
 const Root = styled.div`
   width: 100%;
@@ -38,6 +39,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/singup" element={<SingUp />} />
             </Routes>
           </Layout>
         </Router>
