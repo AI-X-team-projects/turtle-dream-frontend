@@ -8,6 +8,7 @@ import theme from './theme/theme';
 import ChartP from './pages/chart/ChartP';
 import SingUp from "./pages/signup/SignUp";
 import Main from "./pages/main/Main";
+import Analysis from "./pages/analyze/Analysis";
 
 const Root = styled.div`
   width: 100%;
@@ -44,6 +45,7 @@ function App() {
               <Route path="/ChartP" element={<ChartP />} />
               <Route path="/signup" element={<SingUp />} />
               <Route path="/main" element={<Main />} />
+              <Route path="/analysis" element={<Analysis />} />
             </Routes>
           </Layout>
         </Router>
