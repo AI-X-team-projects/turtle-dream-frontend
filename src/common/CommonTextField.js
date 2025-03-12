@@ -21,7 +21,7 @@ const InputStyle = styled.input`
 `;
 
 const CommonTextField = ({
-    type,
+    type = "text",
     width,
     placeholder,
     value,
