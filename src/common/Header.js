@@ -12,19 +12,22 @@ const Root = styled.div`
     border-bottom: 1px solid #D4D4D4;
 `;
 
-const TextStyle = styled.p`
-    margin: 0;
-    font-size: ${(props) => props.theme.fontSize.base};
-    color: ${(props) => props.theme.color.black};
-    font-weight: 800;
-    
+const ButtonStyle = styled.button`
+  background: ${(props) => (props.theme.color.white)};
+  box-sizing: border-box;
+  padding: 0px;
+  color: ${(props) => props.theme.color.black};
+  font-size: ${(props) => props.theme.fontSize.base};
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
 `;
 
 const Header = () => {
     return (
         <Root>
             <Logo/>
-            <TextStyle>로그아웃</TextStyle>
+            <ButtonStyle>로그아웃</ButtonStyle>
         </Root>
     );
 };

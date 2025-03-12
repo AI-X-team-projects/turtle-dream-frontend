@@ -1,3 +1,4 @@
+
 const headerHeight = '74px';
 
 const fontSize = {
@@ -10,11 +11,12 @@ const fontSize = {
 };
 
 const color = {
-    white: '#FFFFFF',
-    black: '#303030',
-    green: '#3B604B',
-    lightGreen: '#E7ECE9',
-    red: '#EF222E',
+  white: '#FFFFFF',
+  black: '#303030',
+  green: '#3B604B',
+  lightGreen: '#E7ECE9',
+  red: '#EF222E',
+  grey: '#DADADA',
 };
 
 const theme = {
