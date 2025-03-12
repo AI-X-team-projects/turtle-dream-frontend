@@ -118,12 +118,14 @@ const SignUp = () => {
       <CommonTextField
         type={"password"}
         placeholder={"비밀번호"}
+        width={"346px"}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
       <CommonTextField
         type={"password"}
         placeholder={"비밀번호 확인"}
+        width={"346px"}
         value={passwordCheck}
         onChange={(e) => SetPasswordCheck(e.target.value)}
       />
