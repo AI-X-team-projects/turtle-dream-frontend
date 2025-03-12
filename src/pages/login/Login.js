@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import CommonButton from '../../common/CommonButton';
 import CommonTextField from '../../common/CommonTextField';
 import CommonRoot from '../../common/CommonRoot';
+import { useNavigate } from "react-router-dom";
 
 const Root = styled(CommonRoot)`
     & input {
@@ -35,6 +36,12 @@ const TextStyle = styled.p`
 `;
 
 const Login = () => {
+    const navigate = useNavigate();
+
+    const goToSignUp = () => {
+        navigate("/signup");
+    }
+
     return (
         <Root>
             <TitleStyle>로그인</TitleStyle>
@@ -48,7 +55,7 @@ const Login = () => {
                 width={"346px"}
             />
             <CommonButton width={"346px"} children={"로그인"}/>
-            <TextStyle>회원이 아닌신가요? <span>회원가입</span></TextStyle>
+            <TextStyle>회원이 아닌신가요? <span onClick={goToSignUp}>회원가입</span></TextStyle>
         </Root>
     );
 };
