@@ -2,14 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import CommonButton from '../../common/CommonButton';
 import CommonTextField from '../../common/CommonTextField';
+import CommonRoot from '../../common/CommonRoot';
 
-const Root = styled.div`
-    width: 100%;
-    min-height: ${(props) => `calc(100vh - ${props.theme.headerHeight})`};
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+const Root = styled(CommonRoot)`
     & input {
         margin-bottom: 6px;
     }
@@ -48,6 +43,7 @@ const Login = () => {
                 width={"346px"}
             />
             <CommonTextField
+                type={"password"}
                 placeholder={"비밀번호"}
                 width={"346px"}
             />
