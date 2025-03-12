@@ -6,7 +6,7 @@ import CommonRoot from '../../common/CommonRoot';
 
 const Root = styled(CommonRoot)`
     & input {
-        margin-bottom: 6px;
+        margin-bottom: 10px;
     }
     & button {
         margin-top: 14px;

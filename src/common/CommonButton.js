@@ -20,6 +20,7 @@ const CommonButton = ({
   width,
   height,
   outline = false, 
+  onClick,
 }) => {
   return (
     <ButtonStyle
@@ -27,6 +28,7 @@ const CommonButton = ({
       height={height}
       $outline={outline}
       fontSize={fontSize}
+      onClick={onClick}
     >
       {children}
     </ButtonStyle>
