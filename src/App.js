@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import Login from "./pages/login/Login";
 import Header from './common/Header';
 import theme from './theme/theme';
+import ChartP from './pages/chart/ChartP';
 import SingUp from "./pages/siginup/SignUp";
 
 const Root = styled.div`
@@ -39,6 +40,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/ChartP" element={<ChartP />} />
               <Route path="/singup" element={<SingUp />} />
             </Routes>
           </Layout>

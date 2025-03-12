@@ -17,67 +17,53 @@ const DayChart = () => {
     };
 
     const textBoxStyle = {
+        border: '1px solid #ccc',
         width: '90vw',
         padding: '20px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#E7ECE9', 
         borderRadius: '8px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     };
 
+    const h2 ={
+        fontSize: '20px',
+        fontWeight: 'bold',
+        marginBottom: '10px',
+        color: '#3B604B'
+    }
+    const p = { 
+        fontSize: '16px',
+        color: '#303030'
+    }
     const textBoxTitleStyle = {
         marginBottom: '10px'
     };
 
-    // 일일 데이터
-    const rawData = [
-        {
-            name: '망나뇽',
-            postuer: "good",
-            date: '2025-03-11',
-            time: '12:00',   
-        },
-        {
-            name: '망나뇽',
-            postuer: "bad",
-            date: '2025-03-11',
-            time: '13:00',   
-        },
-        {
-            name: '망나뇽',
-            postuer: "bad",
-            date: '2025-03-11',
-            time: '14:00',   
-        },
-        {
-            name: '망나뇽',
-            postuer: "good",
-            date: '2025-03-11',
-            time: '15:00',   
-        },
-        {
-            name: '망나뇽',
-            postuer: "good",
-            date: '2025-03-11',
-            time: '16:00',   
-        },
-        {
-            name: '망나뇽',
-            postuer: "bad",
-            date: '2025-03-11',
-            time: '17:00',   
+    // 5분 간격의 데이터 생성 (09:00부터 18:00까지)
+    const generateTimeData = () => {
+        const data = [];
+        const startHour = 9;
+        const endHour = 18;
+        
+        for (let hour = startHour; hour <= endHour; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                // 랜덤한 나쁜 자세 횟수 (0~18 사이)
+                const badPostureCount = Math.floor(Math.random() * 19);
+                data.push({
+                    x: time,
+                    y: badPostureCount
+                });
+            }
         }
-    ];
+        return data;
+    };
 
-    // 데이터 변환
     const transformedData = [
         {
-            id: "자세 상태",
+            id: "나쁜 자세 횟수",
             color: "#90EE90",
-            data: rawData.map(item => ({
-                x: item.time,
-                y: item.postuer === "good" ? 1 : 0,
-                posture: item.postuer
-            }))
+            data: generateTimeData()
         }
     ];
 
@@ -86,45 +72,45 @@ const DayChart = () => {
             <div style={containerStyle}>
                 <ResponsiveLine
                     data={transformedData}
-                    margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+                    margin={{ top: 50, right: 110, bottom: 70, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{
                         type: 'linear',
-                        min: -0.1,
-                        max: 1.1,
-                        stacked: true,
+                        min: 0,
+                        max: 18,
+                        stacked: false,
                         reverse: false
                     }}
-                    yFormat=" >-.2f"
+                    curve="monotoneX"
                     axisTop={null}
                     axisRight={null}
                     axisBottom={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        tickRotation: -45,
-                        legend: '시간',
-                        legendOffset: 40,
-                        legendPosition: 'middle'
+                        tickValues: transformedData[0].data
+                            .filter((_, index) => index % 2 === 0) // 1시간 간격으로 표시
+                            .map(d => d.x)
                     }}
                     axisLeft={{
                         tickSize: 5,
                         tickPadding: 5,
-                        tickRotation: 0,
-                        legend: '자세 상태 (0: 나쁨, 1: 좋음)',
                         legendOffset: -46,
-                        legendPosition: 'middle'
+                        legendPosition: 'middle',
+                        tickValues: [0, 3, 6, 9, 12, 15, 18]
                     }}
                     enableGridX={false}
-                    pointSize={10}
-                    pointColor={{ theme: 'background' }}
+                    gridXValues={transformedData[0].data
+                        .filter((_, index) => index % 2 === 0)
+                        .map(d => d.x)}
+                    enableGridY={true}
+                    pointSize={4}
+                    pointColor="#90EE90"
                     pointBorderWidth={2}
                     pointBorderColor="#90EE90"
-                    colors={["#90EE90"]}
-                    fillOpacity={0.6}
+                    pointLabelYOffset={-12}
                     enableArea={true}
-                    areaOpacity={0.3}
-                    enableTouchCrosshair={true}
+                    areaBaselineValue={0}
+                    areaOpacity={0.15}
                     useMesh={true}
+                    colors={["#90EE90"]}
                     tooltip={({ point }) => (
                         <div
                             style={{
@@ -135,15 +121,15 @@ const DayChart = () => {
                             }}
                         >
                             <strong>{point.data.x}</strong>
-                            <div>{point.data.y === 1 ? '자세 좋음' : '자세 나쁨'}</div>
+                            <div>나쁜 자세: {point.data.y}회</div>
                         </div>
                     )}
                 />
             </div>
             <div style={textBoxStyle}>
                 <div style={textBoxTitleStyle}>
-                    <h2>일일 자세 분석</h2>
-                    <p>오늘 하루 자세 현황을 확인해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</p>
+                    <h2 style={h2}>일일 나쁜 자세 분석</h2>
+                    <p>30분 간격으로 나쁜 자세가 발생한 횟수를 확인해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</p>
                 </div>
             </div>
         </div>
