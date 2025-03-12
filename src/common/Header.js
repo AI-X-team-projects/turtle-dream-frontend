@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { ReactComponent as Logo } from '../assets/images/Logo.svg';
+import { useNavigate } from "react-router-dom";
 
 const Root = styled.div`
     width: 100%;
@@ -24,10 +25,16 @@ const ButtonStyle = styled.button`
 `;
 
 const Header = () => {
+    const navigate = useNavigate();
+
+    const goToSignIn = () => {
+        navigate("/");
+    }
+
     return (
         <Root>
             <Logo/>
-            <ButtonStyle>로그아웃</ButtonStyle>
+            <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
         </Root>
     );
 };

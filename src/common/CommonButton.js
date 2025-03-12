@@ -4,7 +4,7 @@ import styled from "styled-components";
 const ButtonStyle = styled.button`
   width: ${(props) => props.width || "50px"};
   height: ${(props) => props.height || "55px"};
-  background: ${(props) => (props.$outline ? props.theme.color.white : props.theme.color.green)};
+  background: ${(props) => (props.$outline ? props.theme.color.white : props.$background ? props.theme.color.red : props.theme.color.green)};
   box-sizing: border-box;
   border-radius: 8px;
   color: ${(props) => (props.$outline ? props.theme.color.green : props.theme.color.white)};
@@ -20,6 +20,8 @@ const CommonButton = ({
   width,
   height,
   outline = false, 
+  onClick,
+  background
 }) => {
   return (
     <ButtonStyle
@@ -27,6 +29,8 @@ const CommonButton = ({
       height={height}
       $outline={outline}
       fontSize={fontSize}
+      $background={background}
+      onClick={onClick}
     >
       {children}
     </ButtonStyle>
