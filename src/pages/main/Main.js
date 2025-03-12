@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import CommonRoot from '../../common/CommonRoot';
 import { ReactComponent as TurtleImage } from '../../assets/images/TurtleImage.svg';
 import CommonButton from '../../common/CommonButton';
+import { useNavigate } from "react-router-dom";
 
 const TitleStyle = styled.p`
     margin: 0;
@@ -30,7 +31,12 @@ const Box = styled.div`
 `;
 
 const Main = () => {
-
+    const navigate = useNavigate();
+    
+    const goToAnalysis = () => {
+        navigate("/analysis");
+    }
+    
     const ButtonProps = {
         width: '290px',
     };
@@ -47,6 +53,7 @@ const Main = () => {
             <Box>
                 <CommonButton 
                     children={"자세 측정 시작"}
+                    onClick={goToAnalysis}
                     {...ButtonProps}
                 />
                 <CommonButton 
