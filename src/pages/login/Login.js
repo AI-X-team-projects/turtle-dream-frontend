@@ -37,8 +37,26 @@ const TextStyle = styled.p`
   }
 `;
 
+const ErrorText = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSize.xs};
+  color: ${(props) => props.theme.color.red};
+  font-weight: bold;
+  text-align: center;
+`;
+
+const MessageStyle = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSize.base};
+  color: ${(props) => props.theme.color.black};
+  text-align: center;
+  font-weight: 800;
+`;
+
 const Login = () => {
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   // 상태로 username과 password 변수 선언
   const [username, setUsername] = useState("");
@@ -52,9 +70,11 @@ const Login = () => {
   // 로그인 요청
   const handleLogin = async () => {
     if (!username || !password) {
-      alert("아이디와 비밀번호를 모두 입력해주세요.");
+      setErrorMessage("아이디와 비밀번호를 모두 입력해주세요.");
       return;
     }
+
+    setErrorMessage("");
 
     try {
       const userData = {
@@ -69,15 +89,21 @@ const Login = () => {
         // 사용자 정보를 localStorage에 저장
         localStorage.setItem("userId", response.userId || response.id);
         localStorage.setItem("username", response.username);
-        alert("로그인 성공");
-        navigate("/main"); // 메인 페이지로 이동
+        // alert("로그인 성공");
+        setDialogOpen(true);
       }
     } catch (error) {
       console.error("로그인 실패:", error);
       const errorMessage =
         error.response?.data?.message || "로그인에 실패하였습니다.";
-      alert(errorMessage);
+      setErrorMessage(errorMessage);
     }
+  };
+
+  // 다이얼로그 닫기
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    navigate("/main"); // 메인 페이지로 이동
   };
 
   return (
@@ -101,6 +127,10 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)} // 상태 업데이트
       />
 
+      <ErrorText>
+        {errorMessage}
+      </ErrorText>
+
       {/* 로그인 버튼 */}
       <CommonButton width={"346px"} onClick={handleLogin}>
         로그인
@@ -110,6 +140,13 @@ const Login = () => {
       <TextStyle>
         회원이 아닌신가요? <span onClick={goToSignUp}>회원가입</span>
       </TextStyle>
+
+      <CommonDialog
+        open={dialogOpen}
+        onClick={handleCloseDialog}
+        onClose={handleCloseDialog}
+        children={<MessageStyle>로그인 성공</MessageStyle>}
+      />
     </Root>
   );
 };
