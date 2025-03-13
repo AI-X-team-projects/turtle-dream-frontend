@@ -21,12 +21,12 @@ const CommonButton = ({
   fontSize,
   width,
   height,
-  outline = false, 
+  outline = false,
   onClick,
   background
 }) => {
   const navigate = useNavigate();
-  
+
   const handleClick = async () => {
     try {
       if (onClick) {
@@ -35,7 +35,7 @@ const CommonButton = ({
         await instance.post(`/api/user/${children}`);
         navigate("/main");
       }
-    } catch(error) {
+    } catch (error) {
       console.error('버튼 클릭 오류:', error);
     }
   };
