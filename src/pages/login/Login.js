@@ -38,7 +38,7 @@ const TextStyle = styled.p`
 
 const Login = () => {
   const navigate = useNavigate();
-  
+
   // 상태로 username과 password 변수 선언
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -50,33 +50,45 @@ const Login = () => {
 
   // 로그인 요청
   const handleLogin = async () => {
+    if (!username || !password) {
+      alert("아이디와 비밀번호를 모두 입력해주세요.");
+      return;
+    }
+
     try {
-      // 로그인 요청에 필요한 데이터 준비
       const userData = {
-        username: username,  // 상태에서 username을 가져옵니다.
-        password: password   // 상태에서 password을 가져옵니다.
+        username: username,
+        password: password,
       };
 
-      // axios를 사용하여 POST 요청
-      const response = await userApi.login(userData);  // 로그인 API 호출
-      alert("로그인 성공");
-      console.log(response);
+      const response = await userApi.login(userData);
+      console.log("로그인 응답:", response);
+
+      if (response) {
+        // 사용자 정보를 localStorage에 저장
+        localStorage.setItem("userId", response.userId || response.id);
+        localStorage.setItem("username", response.username);
+        alert("로그인 성공");
+        navigate("/main"); // 메인 페이지로 이동
+      }
     } catch (error) {
-      alert("로그인에 실패하였습니다.");
-      console.error(error);
+      console.error("로그인 실패:", error);
+      const errorMessage =
+        error.response?.data?.message || "로그인에 실패하였습니다.";
+      alert(errorMessage);
     }
   };
 
   return (
     <Root>
       <TitleStyle>로그인</TitleStyle>
-      
+
       {/* 사용자명 입력 */}
       <CommonTextField
         placeholder={"아이디"}
         width={"346px"}
-        value={username}  // 상태에 있는 username을 연결
-        onChange={(e) => setUsername(e.target.value)}  // 상태 업데이트
+        value={username} // 상태에 있는 username을 연결
+        onChange={(e) => setUsername(e.target.value)} // 상태 업데이트
       />
 
       {/* 비밀번호 입력 */}
@@ -84,8 +96,8 @@ const Login = () => {
         type={"password"}
         placeholder={"비밀번호"}
         width={"346px"}
-        value={password}  // 상태에 있는 password를 연결
-        onChange={(e) => setPassword(e.target.value)}  // 상태 업데이트
+        value={password} // 상태에 있는 password를 연결
+        onChange={(e) => setPassword(e.target.value)} // 상태 업데이트
       />
 
       {/* 로그인 버튼 */}
