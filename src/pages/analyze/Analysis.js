@@ -119,6 +119,20 @@ const Analysis = () => {
     setStart(false);
   };
 
+  // 창 닫기 방지 기능 추가
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (start) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [start]);
+
   // 로그아웃 이벤트 구독
   useEffect(() => {
     const unsubscribe = eventBus.subscribe("STOP_CAMERA", () => {
@@ -188,14 +202,14 @@ const Analysis = () => {
         const constraints = {
           video: selectedDevice
             ? {
-                deviceId: { exact: selectedDevice.deviceId },
-                width: { ideal: 500 },
-                height: { ideal: 281 },
-              }
+              deviceId: { exact: selectedDevice.deviceId },
+              width: { ideal: 500 },
+              height: { ideal: 281 },
+            }
             : {
-                width: { ideal: 500 },
-                height: { ideal: 281 },
-              },
+              width: { ideal: 500 },
+              height: { ideal: 281 },
+            },
           audio: false,
         };
 
