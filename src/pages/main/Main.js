@@ -36,9 +36,13 @@ const Main = () => {
     const goToAnalysis = () => {
         navigate("/analysis");
     }
+
+    const goToChart = () => {
+        navigate("/ChartP");
+    }
     
     const ButtonProps = {
-        width: '290px',
+        width: '255px',
     };
 
     return (
@@ -52,12 +56,13 @@ const Main = () => {
             </TextStyle>
             <Box>
                 <CommonButton 
-                    children={"/ws/posture"}
+                    children={"자세 측정 시작"}
                     onClick={goToAnalysis}
                     {...ButtonProps}
                 />
                 <CommonButton 
                     children={"자세분석"}
+                    onClick={goToChart}
                     {...ButtonProps}
                 />
             </Box>

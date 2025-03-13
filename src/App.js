@@ -23,7 +23,7 @@ const Root = styled.div`
 `;
 
 const ContentsBox = styled.div`
-  width: 600px;
+  
 `;
 
 function Layout({ children }) {
