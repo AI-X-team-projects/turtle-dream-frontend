@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from "styled-components";
 import { Dialog } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -53,6 +53,22 @@ const CommonDialog = ({
     title,
     children,
 }) => {
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Enter') {
+                onClose();
+            }
+        };
+
+        if (open) {
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open, onClose]);
+
     return (
         <DialogStyle onClose={onClose} open={open}>
             <TitleBox>
@@ -63,7 +79,7 @@ const CommonDialog = ({
                 {children}
             </ContentsBox>
             <ControllBox>
-                <CommonButton onClick={onClick} height={"35px"} children={"확인"} fontSize={"12px"} />
+                <CommonButton onClick={onClose} height={"35px"} children={"확인"} fontSize={"12px"} />
             </ControllBox>
         </DialogStyle>
     );

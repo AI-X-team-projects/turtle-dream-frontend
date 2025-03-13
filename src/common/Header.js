@@ -65,8 +65,6 @@ const Header = () => {
       console.error("로그아웃 실패:", error);
       setDialogOpen(true);
       setDialogMessage("로그아웃에 실패했습니다. 다시 시도해주세요.");
-      // 에러가 발생해도 로그인 페이지로 이동
-      // navigate("/");
     }
   };
 
@@ -80,22 +78,25 @@ const Header = () => {
     navigate("/main");
   };
 
+  // 로그인 페이지나 회원가입 페이지에서는 다이얼로그를 렌더링하지 않음
+  if (pathname === "/" || pathname === "/signup") {
+    return (
+      <Root>
+        <Logo onClick={goToMain} />
+      </Root>
+    );
+  }
+
   return (
     <Root>
       <Logo onClick={goToMain} />
-      {pathname === "/" || pathname === "/signup" ?
-        <></>
-        :
-        <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
-      }
-
+      <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
       <CommonDialog
         open={dialogOpen}
         onClick={handleCloseDialog}
         onClose={handleCloseDialog}
         children={<MessageStyle>{dialogMessage}</MessageStyle>}
       />
-
     </Root>
   );
 };
