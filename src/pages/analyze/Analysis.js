@@ -97,6 +97,32 @@ const BackText = styled.button`
   text-align: center;
 `;
 
+// 연결 상태 표시 컴포넌트
+const ConnectionStatus = styled.div`
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: ${(props) => props.theme.fontSize.sm};
+  text-align: center;
+  background-color: ${(props) =>
+    props.$isConnected
+      ? props.theme.color.green
+      : props.$hasError
+      ? props.theme.color.red
+      : props.theme.color.grey};
+  color: white;
+`;
+
+const ErrorMessage = styled.div`
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: ${(props) => props.theme.fontSize.sm};
+  text-align: center;
+  background-color: ${(props) => props.theme.color.red};
+  color: white;
+`;
+
 const Analysis = () => {
   const [start, setStart] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -106,8 +132,13 @@ const Analysis = () => {
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
-  const { startWebSocket, stopWebSocket, sendImageData, isConnected } =
-    useWebSocket();
+  const {
+    startWebSocket,
+    stopWebSocket,
+    sendImageData,
+    isConnected,
+    connectionError,
+  } = useWebSocket();
 
   // 카메라 종료 함수
   const stopCamera = () => {
@@ -209,6 +240,7 @@ const Analysis = () => {
         setStart(true);
       } catch (error) {
         console.error("카메라 접근 오류:", error);
+        alert(`카메라 접근 오류: ${error.message}`);
       }
     } else {
       stopCamera();
@@ -274,6 +306,24 @@ const Analysis = () => {
           <VideoImage />
         )}
       </VideoBoxStyle>
+
+      {start && (
+        <ConnectionStatus
+          $isConnected={isConnected}
+          $hasError={!!connectionError}
+        >
+          {isConnected
+            ? "서버에 연결됨"
+            : connectionError
+            ? "연결 오류"
+            : "서버에 연결 중..."}
+        </ConnectionStatus>
+      )}
+
+      {start && connectionError && (
+        <ErrorMessage>{connectionError}</ErrorMessage>
+      )}
+
       <DropdownContainer>
         <SelectBox onClick={() => setIsOpen(!isOpen)}>
           {selected}{" "}
