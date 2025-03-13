@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { ReactComponent as Logo } from "../assets/images/Logo.svg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { userApi } from "../api/userApi";
 import eventBus from "../utils/eventBus";
+import CommonDialog from "./CommonDialog";
 
 const Root = styled.div`
   width: 100%;
@@ -29,8 +30,19 @@ const ButtonStyle = styled.button`
   cursor: pointer;
 `;
 
+const MessageStyle = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSize.base};
+  color: ${(props) => props.theme.color.black};
+  text-align: center;
+  font-weight: 800;
+`;
+
 const Header = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogMessage, setDialogMessage] = useState("")
 
   const goToSignIn = async () => {
     try {
@@ -46,16 +58,22 @@ const Header = () => {
       // 로그아웃 성공 시 로컬 스토리지 정보 삭제
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
-      alert("로그아웃 되었습니다.");
+      setDialogOpen(true);
+      setDialogMessage("로그아웃 되었습니다.");
 
-      // 로그인 페이지로 이동
-      navigate("/");
     } catch (error) {
       console.error("로그아웃 실패:", error);
-      alert("로그아웃에 실패했습니다. 다시 시도해주세요.");
+      setDialogOpen(true);
+      setDialogMessage("로그아웃에 실패했습니다. 다시 시도해주세요.");
       // 에러가 발생해도 로그인 페이지로 이동
-      navigate("/");
+      // navigate("/");
     }
+  };
+
+  // 다이얼로그 닫기
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    navigate("/"); // 로그인 페이지로 이동
   };
 
   const goToMain = () => {
@@ -65,7 +83,19 @@ const Header = () => {
   return (
     <Root>
       <Logo onClick={goToMain} />
-      <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
+      {pathname === "/" || pathname === "/signup" ?
+        <></>
+        :
+        <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
+      }
+
+      <CommonDialog
+        open={dialogOpen}
+        onClick={handleCloseDialog}
+        onClose={handleCloseDialog}
+        children={<MessageStyle>{dialogMessage}</MessageStyle>}
+      />
+
     </Root>
   );
 };
