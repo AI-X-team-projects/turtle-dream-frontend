@@ -12,12 +12,10 @@ export const userApi = {
     },
 
     // 로그인
-    login: async (credentials) => {
+    login: async (userData) => {
         try {
-            const response = await axios.post('/api/user/login', credentials);
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-            }
+           // const response = await axios.post('/api/user/login',userData);
+            const response = await axios.post('/api/user/login',userData);
             return response.data;
         } catch (error) {
             throw error;

@@ -53,6 +53,13 @@ const SignUp = () => {
 
   // 회원가입 요청
   const handleSignUp = async () => {
+
+    if (username === "" || password === "" || passwordCheck === "" || name === "" || gender === "" || age === "" || height === "") {
+      alert("모든 항목을 입력해주세요.");
+      return;
+    }
+
+
     if (password !== passwordCheck) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
@@ -72,17 +79,20 @@ const SignUp = () => {
   const handleCheckUserName = async () => {
     try {
       const response = await userApi.checkUsername(username);
-      if (response.isAvailable) {
+      if (response === true) {
         setUserNameAvailable(true);
         alert("사용 가능한 아이디입니다.");
       } else {
         setUserNameAvailable(false);
         alert("이미 사용 중인 아이디입니다.");
+        console.log("아이디 중복 확인 실패");
       }
     } catch (error) {
+      setUserNameAvailable(false);
       console.error("아이디 중복 확인 실패", error);
     }
   };
+
 
   const InputProps = {
     width: "346px",

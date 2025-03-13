@@ -26,7 +26,8 @@ const CommonTextField = ({
     placeholder,
     value,
     onChange,
-    disabled
+    disabled,
+    name
 }) => {
   return (
     <InputStyle 
@@ -36,6 +37,7 @@ const CommonTextField = ({
         value={value}
         onChange={onChange}
         disabled={disabled}
+        name={name}
     />
   );
 };
