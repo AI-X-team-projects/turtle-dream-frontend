@@ -47,7 +47,7 @@ const SignUp = () => {
   const [password, setPassword] = useState(""); // 비밀번호 입력
   const [passwordCheck, SetPasswordCheck] = useState(""); // 비밀번호 확인 입력
   const [name, setName] = useState(""); // 이름 입력
-  const [userNameAvailable, setUserNameAvailable] = useState(false); // 아이디 중복 확인
+  const [userNameAvailable, setUserNameAvailable] = useState(""); // 아이디 중복 확인
   const [age, setAge] = useState(""); // 나이 입력
   const [height, setHeight] = useState(""); // 키 입력
 
@@ -61,7 +61,7 @@ const SignUp = () => {
       const userData = { username, password, name, gender, age, height }; // 파라미터 객체로 묶기
       const response = await userApi.register(userData);
       alert("회원가입이 완료되었습니다.");
-      navigate("/login"); // 로그인 페이지로 이동
+      navigate("/"); // 로그인 페이지로 이동
     } catch (error) {
       alert("회원 가입에 실패 하셨습니다.");
       console.error("회원가입 실패", error);

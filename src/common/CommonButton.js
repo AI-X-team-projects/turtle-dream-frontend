@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
 const ButtonStyle = styled.button`
@@ -15,15 +16,6 @@ const ButtonStyle = styled.button`
   cursor: pointer;
 `;
 
-const handleClick = async () => {
-    try{
-        await instance.post(`/api/user/${children}`);
-        navigate("/main");
-    }catch(error){
-        console.error('버튼 클릭 오류:', error);
-    }
-}
-
 const CommonButton = ({
   children,
   fontSize,
@@ -33,6 +25,21 @@ const CommonButton = ({
   onClick,
   background
 }) => {
+  const navigate = useNavigate();
+  
+  const handleClick = async () => {
+    try {
+      if (onClick) {
+        onClick();
+      } else {
+        await instance.post(`/api/user/${children}`);
+        navigate("/main");
+      }
+    } catch(error) {
+      console.error('버튼 클릭 오류:', error);
+    }
+  };
+
   return (
     <ButtonStyle
       width={width}
