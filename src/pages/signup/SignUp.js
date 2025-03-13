@@ -58,53 +58,53 @@ const SignUp = () => {
 
     if (!username) {
       newErrors.username = "아이디를 입력해주세요.";
-      alert("아이디를 입력해주세요.");
+      setErrors(newErrors);
       return false;
     }
     if (!userNameAvailable) {
       newErrors.username = "아이디 중복 확인이 필요합니다.";
-      alert("아이디 중복 확인이 필요합니다.");
+      setErrors(newErrors);
       return false;
     }
     if (!password) {
-      newErrors.password = "비밀번호를 입력해주세요.";
-      alert("비밀번호를 입력해주세요.");
+      newErrors.username = "비밀번호를 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
     if (password !== passwordCheck) {
-      newErrors.passwordCheck = "비밀번호가 일치하지 않습니다.";
-      alert("비밀번호가 일치하지 않습니다.");
+      newErrors.username = "비밀번호가 일치하지 않습니다.";
+      setErrors(newErrors);
       return false;
     }
     if (!name) {
-      newErrors.name = "이름을 입력해주세요.";
-      alert("이름을 입력해주세요.");
+      newErrors.username = "이름을 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
     if (!age) {
-      newErrors.age = "나이를 입력해주세요.";
-      alert("나이를 입력해주세요.");
+      newErrors.username = "나이를 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
     if (!height) {
-      newErrors.height = "키를 입력해주세요.";
-      alert("키를 입력해주세요.");
+      newErrors.username = "키를 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
 
     // 숫자 필드 검증
     if (age && (isNaN(age) || age < 1)) {
-      newErrors.age = "올바른 나이를 입력해주세요.";
-      alert("올바른 나이를 입력해주세요.");
+      newErrors.username = "올바른 나이를 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
     if (height && (isNaN(height) || height < 1)) {
-      newErrors.height = "올바른 키를 입력해주세요.";
-      alert("올바른 키를 입력해주세요.");
+      newErrors.username = "올바른 키를 입력해주세요.";
+      setErrors(newErrors);
       return false;
     }
 
-    setErrors(newErrors);
+    setErrors({});
     return true;
   };
 
@@ -281,7 +281,9 @@ const SignUp = () => {
         />
       </Box>
 
-      <TextStyle>{!userNameAvailable && "중복된 아이디가 있습니다."}</TextStyle>
+      <TextStyle>
+        {errors.username}
+      </TextStyle>
 
       <CommonButton
         width="346px"
