@@ -11,6 +11,9 @@ const Root = styled.div`
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #D4D4D4;
+    & svg {
+        cursor: pointer;
+    }
 `;
 
 const ButtonStyle = styled.button`
@@ -31,9 +34,13 @@ const Header = () => {
         navigate("/");
     }
 
+    const goToMain = () => {
+        navigate("/main");
+    }
+
     return (
         <Root>
-            <Logo/>
+            <Logo onClick={goToMain}/>
             <ButtonStyle onClick={goToSignIn}>로그아웃</ButtonStyle>
         </Root>
     );

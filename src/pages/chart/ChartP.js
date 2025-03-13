@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import DayChart from './DayChart';
 import MonthChart from './MonthChart';
+import { useNavigate } from "react-router-dom";
+import { ReactComponent as ArrowIcon } from '../../assets/images/ArrowIcon.svg';
 
 const Root = styled.div`
     width: 1000px;
@@ -10,6 +12,23 @@ const Root = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
+`;
+
+const BackBox = styled.div`
+    width: 100%;
+    & svg {
+        transform: rotate(90deg);
+    }
+`;
+
+const BackText = styled.button`
+    margin: 8px 0 0;
+    font-size: ${(props) => props.theme.fontSize.sm};
+    color: ${(props) => props.theme.color.black};
+    font-weight: 800;
+    cursor: pointer;
+    background: transparent;
+    border: 0px;
 `;
 
 const TitleStyle = styled.p`
@@ -40,9 +59,18 @@ const ButtonStyle = styled.button`
 
 const ChartP = () => {
     const [chartType, setChartType] = useState('day');
+    const navigate = useNavigate();
+
+    const goToMain = () => {
+        navigate("/main");
+    }
 
     return (
         <Root>
+            <BackBox>
+                <BackText onClick={goToMain}><ArrowIcon/> 메인으로 이동</BackText>
+            </BackBox>
+    
             <TitleStyle>자세 분석</TitleStyle>
             <Box>
                 <ButtonStyle 
