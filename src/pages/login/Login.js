@@ -16,6 +16,13 @@ const Root = styled(CommonRoot)`
   }
 `;
 
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+`;
+
 const TitleStyle = styled.p`
   margin: 0;
   font-size: ${(props) => props.theme.fontSize.xxl};
@@ -62,13 +69,9 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // 회원 가입 페이지로 이동
-  const goToSignUp = () => {
-    navigate("/signup");
-  };
-
-  // 로그인 요청
-  const handleLogin = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // 폼 기본 동작 방지
+    
     if (!username || !password) {
       setErrorMessage("아이디와 비밀번호를 모두 입력해주세요.");
       return;
@@ -103,40 +106,36 @@ const Login = () => {
   // 다이얼로그 닫기
   const handleCloseDialog = () => {
     setDialogOpen(false);
-    navigate("/main"); // 메인 페이지로 이동
+    navigate("/main");   
+  };
+
+  const goToSignUp = () => {
+    navigate("/signup");
   };
 
   return (
     <Root>
       <TitleStyle>로그인</TitleStyle>
+      <Form onSubmit={handleSubmit}>
+        <CommonTextField
+          placeholder="아이디"
+          width="346px"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <CommonTextField
+          type="password"
+          placeholder="비밀번호"
+          width="346px"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <ErrorText>{errorMessage}</ErrorText>
+        <CommonButton type="submit" width="346px">
+          로그인
+        </CommonButton>
+      </Form>
 
-      {/* 사용자명 입력 */}
-      <CommonTextField
-        placeholder={"아이디"}
-        width={"346px"}
-        value={username} // 상태에 있는 username을 연결
-        onChange={(e) => setUsername(e.target.value)} // 상태 업데이트
-      />
-
-      {/* 비밀번호 입력 */}
-      <CommonTextField
-        type={"password"}
-        placeholder={"비밀번호"}
-        width={"346px"}
-        value={password} // 상태에 있는 password를 연결
-        onChange={(e) => setPassword(e.target.value)} // 상태 업데이트
-      />
-
-      <ErrorText>
-        {errorMessage}
-      </ErrorText>
-
-      {/* 로그인 버튼 */}
-      <CommonButton width={"346px"} onClick={handleLogin}>
-        로그인
-      </CommonButton>
-
-      {/* 회원가입 링크 */}
       <TextStyle>
         회원이 아닌신가요? <span onClick={goToSignUp}>회원가입</span>
       </TextStyle>
@@ -145,8 +144,9 @@ const Login = () => {
         open={dialogOpen}
         onClick={handleCloseDialog}
         onClose={handleCloseDialog}
-        children={<MessageStyle>로그인 성공</MessageStyle>}
-      />
+      >
+        <MessageStyle>로그인 성공</MessageStyle>
+      </CommonDialog>
     </Root>
   );
 };
