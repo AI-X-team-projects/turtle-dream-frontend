@@ -5,6 +5,7 @@ import { ReactComponent as VideoImage } from "../../assets/images/VideoImage.svg
 import { ReactComponent as ArrowIcon } from "../../assets/images/ArrowIcon.svg";
 import CommonButton from "../../common/CommonButton";
 import { useWebSocket } from "../../common/WebSocketProvider";
+import { useNavigate } from "react-router-dom";
 
 const TitleStyle = styled.p`
   margin: 0;
@@ -84,12 +85,25 @@ const Video = styled.video`
   transform: scaleX(-1);
 `;
 
+const BackText = styled.button`
+    margin: 8px 0 0;
+    font-size: ${(props) => props.theme.fontSize.sm};
+    color: ${(props) => props.theme.color.black};
+    font-weight: 800;
+    cursor: pointer;
+    background: transparent;
+    border: 0px;
+    text-align: center;
+`;
+
 const Analysis = () => {
   const [start, setStart] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("");
   const [cameras, setCameras] = useState([]);
   const [stream, setStream] = useState(null);
+  const navigate = useNavigate();
+
   const videoRef = useRef(null);
   const { startWebSocket, stopWebSocket, sendImageData, isConnected } =
     useWebSocket();
@@ -144,14 +158,14 @@ const Analysis = () => {
         const constraints = {
           video: selectedDevice
             ? {
-                deviceId: { exact: selectedDevice.deviceId },
-                width: { ideal: 500 },
-                height: { ideal: 281 },
-              }
+              deviceId: { exact: selectedDevice.deviceId },
+              width: { ideal: 500 },
+              height: { ideal: 281 },
+            }
             : {
-                width: { ideal: 500 },
-                height: { ideal: 281 },
-              },
+              width: { ideal: 500 },
+              height: { ideal: 281 },
+            },
           audio: false,
         };
 
@@ -219,6 +233,10 @@ const Analysis = () => {
     return () => clearInterval(interval);
   }, [start, stream, sendImageData, isConnected]);
 
+  const goToMain = () => {
+    navigate("/main");
+  }
+
   return (
     <CommonRoot>
       <TitleStyle>자세 측정</TitleStyle>
@@ -253,6 +271,7 @@ const Analysis = () => {
         children={start ? "측정 중지" : "측정 시작"}
         onClick={handleClickButton}
       />
+      <BackText onClick={goToMain}>메인으로 이동</BackText>
     </CommonRoot>
   );
 };
