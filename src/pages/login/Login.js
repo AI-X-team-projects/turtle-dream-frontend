@@ -5,6 +5,7 @@ import CommonRoot from "../../common/CommonRoot";
 import CommonButton from "../../common/CommonButton";
 import { useNavigate } from "react-router-dom";
 import { userApi } from "../../api/userApi";
+import CommonDialog from "../../common/CommonDialog";
 
 const Root = styled(CommonRoot)`
   & input {
