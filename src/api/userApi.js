@@ -14,7 +14,11 @@ export const userApi = {
   // 로그인
   login: async (userData) => {
     try {
-      const response = await axios.post("/api/user/login", userData);
+      const response = await axios.post(
+        `/api/user/login?username=${encodeURIComponent(
+          userData.username
+        )}&password=${encodeURIComponent(userData.password)}`
+      );
       return response.data;
     } catch (error) {
       throw error;
