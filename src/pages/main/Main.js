@@ -52,7 +52,7 @@ const Main = () => {
             </TextStyle>
             <Box>
                 <CommonButton 
-                    children={"자세 측정 시작"}
+                    children={"/ws/posture"}
                     onClick={goToAnalysis}
                     {...ButtonProps}
                 />
