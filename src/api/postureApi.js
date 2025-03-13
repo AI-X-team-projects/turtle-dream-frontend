@@ -3,9 +3,11 @@ import axios from './axios';
 
 export const postureApi = {
     // 일일 자세 데이터 조회
-    getDailyPosture: async (date) => {
+    getDailyPosture: async (userId, date) => {
         try {
-            const response = await axios.get(`/api/posture/daily?date=${date}`);
+            const response = await axios.get(`/api/posture/daily`, {
+                params: { userId, date }
+            });
             return response.data;
         } catch (error) {
             throw error;

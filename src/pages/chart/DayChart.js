@@ -87,7 +87,7 @@ const DayChart = () => {
                     id: "나쁜 자세 횟수",
                     color: "#3B604B",
                     data: response.data.map(item => ({
-                        x: item.time,
+                        x: item.time, // 이 부분 recordedAt으로 사용 백엔드에 time 없음
                         y: item.badPostureCount
                     }))
                 }];
