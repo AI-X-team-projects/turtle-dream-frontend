@@ -4,6 +4,7 @@ import CommonRoot from '../../common/CommonRoot';
 import { ReactComponent as VideoImage } from '../../assets/images/VideoImage.svg';
 import { ReactComponent as ArrowIcon } from '../../assets/images/ArrowIcon.svg';
 import CommonButton from '../../common/CommonButton';
+import { useNavigate } from "react-router-dom";
 
 const TitleStyle = styled.p`
     margin: 0;
@@ -71,10 +72,20 @@ const OptionItem = styled.li`
   }
 `;
 
+const BackText = styled.p`
+  margin: 8px 0 0;
+  font-size: ${(props) => props.theme.fontSize.sm};
+  color: ${(props) => props.theme.color.black};
+  text-align: center;
+  font-weight: 800;
+  cursor: pointer;
+`;
+
 const Analysis = () => {
     const [start, setStart] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState("Facetime HD Camera (Built-in)");
+    const navigate = useNavigate();
 
     const cameras = [
         "Facetime HD Camera (Built-in)",
@@ -89,6 +100,10 @@ const Analysis = () => {
   
     const handleClickButton = () => {
         setStart(!start);
+    }
+
+    const goToMain = () => {
+        navigate("/main");
     }
 
     return (
@@ -115,6 +130,7 @@ const Analysis = () => {
                 children={start ? "측정 중지" : "측정 시작"} 
                 onClick={handleClickButton}
             />
+            <BackText onClick={goToMain}>메인으로 이동</BackText>
         </CommonRoot>
     );
 };
