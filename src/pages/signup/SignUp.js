@@ -4,7 +4,7 @@ import CommonRoot from "../../common/CommonRoot";
 import CommonTextField from "../../common/CommonTextField";
 import CommonButton from "../../common/CommonButton";
 import { userApi } from "../../api/userApi";
-import { useNavigate } from "react-router-dom"; // useNavigate 훅을 사용
+import { useNavigate } from "react-router-dom";
 
 const Root = styled(CommonRoot)`
   & > input {
@@ -41,58 +41,153 @@ const TextStyle = styled.p`
 `;
 
 const SignUp = () => {
-  const navigate = useNavigate(); // navigate 훅 사용
-  const [gender, setGender] = useState("남"); // 성별 선택
-  const [username, setUsername] = useState(""); // 아이디 입력
-  const [password, setPassword] = useState(""); // 비밀번호 입력
-  const [passwordCheck, SetPasswordCheck] = useState(""); // 비밀번호 확인 입력
-  const [name, setName] = useState(""); // 이름 입력
-  const [userNameAvailable, setUserNameAvailable] = useState(""); // 아이디 중복 확인
-  const [age, setAge] = useState(""); // 나이 입력
-  const [height, setHeight] = useState(""); // 키 입력
+  const navigate = useNavigate();
+  const [gender, setGender] = useState("남");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordCheck, setPasswordCheck] = useState("");
+  const [name, setName] = useState("");
+  const [userNameAvailable, setUserNameAvailable] = useState(null);
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 회원가입 요청
-  const handleSignUp = async () => {
+  const validateForm = () => {
+    const newErrors = {};
 
-    if (username === "" || password === "" || passwordCheck === "" || name === "" || gender === "" || age === "" || height === "") {
-      alert("모든 항목을 입력해주세요.");
-      return;
+    if (!username) {
+      newErrors.username = "아이디를 입력해주세요.";
+      alert("아이디를 입력해주세요.");
+      return false;
     }
-
-
+    if (!userNameAvailable) {
+      newErrors.username = "아이디 중복 확인이 필요합니다.";
+      alert("아이디 중복 확인이 필요합니다.");
+      return false;
+    }
+    if (!password) {
+      newErrors.password = "비밀번호를 입력해주세요.";
+      alert("비밀번호를 입력해주세요.");
+      return false;
+    }
     if (password !== passwordCheck) {
+      newErrors.passwordCheck = "비밀번호가 일치하지 않습니다.";
       alert("비밀번호가 일치하지 않습니다.");
-      return;
+      return false;
     }
-    try {
-      const userData = { username, password, name, gender, age, height }; // 파라미터 객체로 묶기
-      const response = await userApi.register(userData);
-      alert("회원가입이 완료되었습니다.");
-      navigate("/"); // 로그인 페이지로 이동
-    } catch (error) {
-      alert("회원 가입에 실패 하셨습니다.");
-      console.error("회원가입 실패", error);
+    if (!name) {
+      newErrors.name = "이름을 입력해주세요.";
+      alert("이름을 입력해주세요.");
+      return false;
     }
+    if (!age) {
+      newErrors.age = "나이를 입력해주세요.";
+      alert("나이를 입력해주세요.");
+      return false;
+    }
+    if (!height) {
+      newErrors.height = "키를 입력해주세요.";
+      alert("키를 입력해주세요.");
+      return false;
+    }
+
+    // 숫자 필드 검증
+    if (age && (isNaN(age) || age < 1)) {
+      newErrors.age = "올바른 나이를 입력해주세요.";
+      alert("올바른 나이를 입력해주세요.");
+      return false;
+    }
+    if (height && (isNaN(height) || height < 1)) {
+      newErrors.height = "올바른 키를 입력해주세요.";
+      alert("올바른 키를 입력해주세요.");
+      return false;
+    }
+
+    setErrors(newErrors);
+    return true;
   };
 
-  // 아이디 중복 확인 함수
-  const handleCheckUserName = async () => {
+  const handleSignUp = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const response = await userApi.checkUsername(username);
-      if (response === true) {
-        setUserNameAvailable(true);
-        alert("사용 가능한 아이디입니다.");
+      const userData = {
+        username,
+        password,
+        name,
+        gender,
+        age: parseInt(age),
+        height: parseFloat(height),
+      };
+      const response = await userApi.register(userData);
+      console.log("회원가입 응답:", response); // 디버깅용 로그 추가
+
+      // response는 이미 response.data의 내용을 가지고 있음
+      if (response) {
+        // 사용자 정보 저장
+        localStorage.setItem("userId", response.userId || response.id);
+        localStorage.setItem("username", response.username);
+        alert("회원가입이 완료되었습니다.");
+        navigate("/");
       } else {
-        setUserNameAvailable(false);
-        alert("이미 사용 중인 아이디입니다.");
-        console.log("아이디 중복 확인 실패");
+        throw new Error("서버 응답 데이터가 올바르지 않습니다.");
       }
     } catch (error) {
-      setUserNameAvailable(false);
-      console.error("아이디 중복 확인 실패", error);
+      console.error("회원가입 실패", error);
+      const errorMessage =
+        error.response?.data?.message || "회원 가입에 실패했습니다.";
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleCheckUserName = async () => {
+    if (!username) {
+      setErrors((prev) => ({ ...prev, username: "아이디를 입력해주세요." }));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const isAvailable = await userApi.checkUsername(username);
+      console.log("아이디 중복 확인 응답:", isAvailable); // 디버깅용 로그
+      setUserNameAvailable(isAvailable);
+
+      if (isAvailable) {
+        setErrors((prev) => ({ ...prev, username: null }));
+        alert("사용 가능한 아이디입니다.");
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          username: "이미 사용 중인 아이디입니다.",
+        }));
+        alert("이미 사용 중인 아이디입니다.");
+      }
+    } catch (error) {
+      console.error("아이디 중복 확인 실패", error);
+      setUserNameAvailable(false);
+      setErrors((prev) => ({
+        ...prev,
+        username:
+          error.response?.data?.message || "아이디 중복 확인에 실패했습니다.",
+      }));
+      alert("아이디 중복 확인에 실패했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setUsername(value);
+    setUserNameAvailable(null);
+    setErrors((prev) => ({ ...prev, username: null }));
+  };
 
   const InputProps = {
     width: "346px",
@@ -101,7 +196,7 @@ const SignUp = () => {
   const ButtonProps = {
     width: "50px",
     height: "50px",
-    fontSize: "16px", // ; 제거
+    fontSize: "16px",
   };
 
   return (
@@ -112,52 +207,54 @@ const SignUp = () => {
           placeholder={"아이디"}
           width={"245px"}
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={handleUsernameChange}
+          error={errors.username}
         />
         <CommonButton
           width={"90px"}
           height={"50px"}
           fontSize={"16px"}
-          onClick={handleCheckUserName} // 아이디 중복 확인
+          onClick={handleCheckUserName}
+          disabled={!username || isLoading}
         >
           중복 확인
         </CommonButton>
       </Box>
 
-      {/* 비밀번호 입력 */}
       <CommonTextField
         type={"password"}
         placeholder={"비밀번호"}
         width={"346px"}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
       />
       <CommonTextField
         type={"password"}
         placeholder={"비밀번호 확인"}
         width={"346px"}
         value={passwordCheck}
-        onChange={(e) => SetPasswordCheck(e.target.value)}
+        onChange={(e) => setPasswordCheck(e.target.value)}
+        error={errors.passwordCheck}
       />
 
-      {/* 이름과 성별 선택 */}
       <Box>
         <CommonTextField
           placeholder={"이름"}
           width={"228px"}
           value={name}
           onChange={(e) => setName(e.target.value)}
+          error={errors.name}
         />
         <CommonButton
           outline={gender === "남" ? false : true}
-          onClick={() => setGender("남")} // 성별 남 선택
+          onClick={() => setGender("남")}
         >
           남
         </CommonButton>
         <CommonButton
           outline={gender === "여" ? false : true}
-          onClick={() => setGender("여")} // 성별 여 선택
-          {...ButtonProps}
+          onClick={() => setGender("여")}
         >
           여
         </CommonButton>
@@ -169,20 +266,27 @@ const SignUp = () => {
           width={"168px"}
           value={age}
           onChange={(e) => setAge(e.target.value)}
+          type="number"
+          error={errors.age}
         />
         <CommonTextField
           placeholder={"키"}
           width={"168px"}
           value={height}
           onChange={(e) => setHeight(e.target.value)}
+          type="number"
+          step="0.1"
+          error={errors.height}
         />
       </Box>
 
-      {/* 아이디 중복 메시지 */}
       <TextStyle>{!userNameAvailable && "중복된 아이디가 있습니다."}</TextStyle>
 
-      {/* 회원가입 버튼 */}
-      <CommonButton width="346px" onClick={handleSignUp}>
+      <CommonButton
+        width="346px"
+        onClick={handleSignUp}
+        disabled={!userNameAvailable}
+      >
         회원가입
       </CommonButton>
     </Root>
