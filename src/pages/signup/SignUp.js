@@ -10,7 +10,7 @@ const Root = styled(CommonRoot)`
   & > input {
     margin-bottom: 10px;
   }
-  & button {
+  & > button {
     margin-top: 14px;
   }
 `;
