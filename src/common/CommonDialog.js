@@ -39,7 +39,7 @@ const ContentsBox = styled.div`
 `;
 
 const ControllBox = styled.div`
-    padding: 16px;
+    padding: 0 16px 16px;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
