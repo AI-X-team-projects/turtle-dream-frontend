@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import CommonButton from '../../common/CommonButton';
 import CommonTextField from '../../common/CommonTextField';
 import CommonRoot from '../../common/CommonRoot';
 import { useNavigate } from "react-router-dom";
+import { userApi } from '../../api/userApi';
 
 const Root = styled(CommonRoot)`
     & input {
@@ -46,7 +47,7 @@ const Login = () => {
     const onChange = (e) => {
         const {name, value} = e.target;
         setLoginForm({
-            ...loginForm,
+            
             [name]: value
         });
     }
@@ -60,12 +61,14 @@ const Login = () => {
             <CommonTextField
                 placeholder={"아이디"}
                 width={"346px"}
+                value={username}
                 onChange={onChange}
             />
             <CommonTextField
                 type={"password"}
                 placeholder={"비밀번호"}
                 width={"346px"}
+                value={password}
                 onChange={onChange}
             />
             <CommonButton width={"346px"} children={loginForm} />
