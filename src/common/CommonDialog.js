@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from "styled-components";
 import { Dialog } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -52,9 +52,18 @@ const CommonDialog = ({
     onClick,
     title,
     children,
+    onKeyDown
 }) => {
+    const buttonRef = useRef(null);
+
+    useEffect(() => {
+        if (open && buttonRef.current) {
+            buttonRef.current.focus(); // 다이얼로그가 열릴 때 버튼에 포커스
+        }
+    }, [open]);
+
     return (
-        <DialogStyle onClose={onClose} open={open}>
+        <DialogStyle onClose={onClose} open={open} onKeyDown={onKeyDown}>
             <TitleBox>
                 <TitleStyle>{title}</TitleStyle>
                 <IconButton onClick={onClose}><CloseIcon /></IconButton>
@@ -63,7 +72,7 @@ const CommonDialog = ({
                 {children}
             </ContentsBox>
             <ControllBox>
-                <CommonButton onClick={onClick} height={"35px"} children={"확인"} fontSize={"12px"} />
+                <CommonButton ref={buttonRef} onKeyDown={onKeyDown} onClick={onClick} height={"35px"} children={"확인"} fontSize={"12px"} />
             </ControllBox>
         </DialogStyle>
     );
