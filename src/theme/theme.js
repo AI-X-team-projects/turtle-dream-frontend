@@ -1,6 +1,10 @@
 
 const headerHeight = '74px';
 
+const display = {
+  sm: '600px',
+}
+
 const fontSize = {
   xs: '0.75rem', // 12px
   sm: '0.875rem', //14px
@@ -21,6 +25,7 @@ const color = {
 
 const theme = {
   headerHeight,
+  display,
   fontSize,
   color,
 };
