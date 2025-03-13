@@ -25,6 +25,17 @@ export const userApi = {
     }
   },
 
+  // 로그아웃
+  logout: async () => {
+    try {
+      const response = await axios.post("/api/user/logout");
+      return true;
+    } catch (error) {
+      console.error("로그아웃 요청 중 오류 발생:", error);
+      throw error;
+    }
+  },
+
   // 사용자명 중복 체크
   checkUsername: async (username) => {
     try {
