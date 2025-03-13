@@ -36,6 +36,10 @@ const Main = () => {
     const goToAnalysis = () => {
         navigate("/analysis");
     }
+
+    const goToChart = () => {
+        navigate("/ChartP");
+    }
     
     const ButtonProps = {
         width: '290px',
@@ -58,6 +62,7 @@ const Main = () => {
                 />
                 <CommonButton 
                     children={"자세분석"}
+                    onClick={goToChart}
                     {...ButtonProps}
                 />
             </Box>

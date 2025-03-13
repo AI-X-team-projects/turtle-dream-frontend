@@ -1,45 +1,44 @@
 import { ResponsiveBar } from '@nivo/bar';
+import styled from 'styled-components';
+
+const Root = styled.div`
+    width: 100%;
+`;
+
+const ChartBox = styled.div`
+    width: 50%;
+    height: 60vh;
+`;
+
+const TextBoxStyle = styled.div`
+    width: 100%;
+    padding: 20px;
+    background: ${(props) => props.theme.color.lightGreen};
+    border-radius: 8px;
+    box-shadow: 0 1px 4px 2px rgb(119 119 119 / 25%);
+`;
+
+const TitleStyle = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.md};
+    color: ${(props) => props.theme.color.green};
+    font-weight: 800;
+`;
+const LineStyle = styled.div`
+    width:120px;
+    height: 2px;
+    background: ${(props) => props.theme.color.green};
+    margin-top: 5px;
+`;
+
+const TextStyle = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.base};
+    color: ${(props) => props.theme.color.black};
+    margin-top: 16px;
+`;
 
 const MonthChart = () => {
-    const pageStyle = {
-        width: '100%',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '20px'
-    };
-
-    const containerStyle = {
-        width: '90vw',
-        height: '75vh'
-    };
-
-    const textBoxStyle = {
-        border: '1px solid #ccc',
-        width: '90vw',
-        padding: '20px',
-        backgroundColor: '#E7ECE9', 
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    };
-
-    const h2 ={
-        fontSize: '20px',
-        fontWeight: 'bold',
-        marginBottom: '10px',
-        color: '#3B604B'
-    }
-    const p = { 
-        fontSize: '16px',
-        color: '#303030'
-    }
-
-    const textBoxTitleStyle = {
-        marginBottom: '10px'
-    };
-
     // 월별 데이터 (좋은 자세와 나쁜 자세를 하나의 객체로 통합)
     const data = [
         { month: '1월', '좋은 자세': 120, '나쁜 자세': 80 },
@@ -49,8 +48,8 @@ const MonthChart = () => {
     ];
 
     return (
-        <div style={pageStyle}>
-            <div style={containerStyle}>
+        <Root>
+            <ChartBox>
                 <ResponsiveBar
                     data={data}
                     keys={['좋은 자세', '나쁜 자세']}
@@ -88,14 +87,13 @@ const MonthChart = () => {
                     ariaLabel="월별 자세 분석"
                     barAriaLabel={e => `${e.id}: ${e.formattedValue}회`}
                 />
-            </div>
-            <div style={textBoxStyle}>
-                <div style={textBoxTitleStyle}>
-                    <h2 style={h2}>월별 자세 분석</h2>
-                    <p style={p}>월별 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</p>
-                </div>
-            </div>
-        </div>
+            </ChartBox>
+            <TextBoxStyle>
+                <TitleStyle>월별 자세 분석</TitleStyle>
+                <LineStyle />
+                <TextStyle>월별 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</TextStyle>
+            </TextBoxStyle>
+        </Root>
     );
 };
 

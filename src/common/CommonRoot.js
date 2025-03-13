@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const CommonRoot = styled.div`
- width: 100%;
+    width: ${(props) => props.theme.display};
     min-height: ${(props) => `calc(100vh - ${props.theme.headerHeight})`};
     display: flex;
     flex-direction: column;
