@@ -84,6 +84,14 @@ const SignUp = () => {
     }
   };
 
+  //빈칸이 있을시에 회원가입이 안돼게
+  const handelSignUp = () => {
+    if (username === "" || password === "" || passwordCheck === "" || name === "" || gender === "" || age === "" || height === "") {
+      alert("모든 항목을 입력해주세요.");
+      return;
+    }
+  };
+
   const InputProps = {
     width: "346px",
   };
