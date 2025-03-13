@@ -45,14 +45,84 @@ const DayChart = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const pageStyle = {
+        width: '100%',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px'
+    };
+
+    const containerStyle = {
+        width: '90vw',
+        height: '75vh'
+    };
+
+    const textBoxStyle = {
+        border: '1px solid #ccc',
+        width: '90vw',
+        padding: '20px',
+        backgroundColor: '#E7ECE9',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    };
+
+    const h2 = {
+        fontSize: '20px',
+        fontWeight: 'bold',
+        marginBottom: '10px',
+        color: '#3B604B'
+    };
+
+    const p = {
+        fontSize: '16px',
+        color: '#303030'
+    };
+
+    const textBoxTitleStyle = {
+        marginBottom: '10px'
+    };
+
+    // 테스트용 데이터 생성 함수
+    const generateTestData = () => {
+        const data = [];
+        const startHour = 9;
+        const endHour = 18;
+
+        for (let hour = startHour; hour <= endHour; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                // 0에서 18 사이의 랜덤한 값 생성
+                const badPostureCount = Math.floor(Math.random() * 12);
+                data.push({
+                    x: time,
+                    y: badPostureCount
+                });
+            }
+        }
+        return data;
+    };
+
     useEffect(() => {
+        // API 연동 전 테스트 데이터 사용
+        const testData = [{
+            id: "나쁜 자세 횟수",
+            color: "#90EE90",
+            data: generateTestData()
+        }];
+        setChartData(testData);
+        setIsLoading(false);
+
+        // API 연동 코드는 주석 처리
+        /*
         const fetchDailyData = async () => {
             try {
                 setIsLoading(true);
                 const today = new Date().toISOString().split('T')[0];
                 const response = await postureApi.getDailyPosture(today);
                 
-                // API 응답 데이터를 차트 데이터 형식으로 변환
                 const transformedData = [{
                     id: "나쁜 자세 횟수",
                     color: "##3B604B",
@@ -73,6 +143,7 @@ const DayChart = () => {
         };
 
         fetchDailyData();
+        */
     }, []);
 
     if (isLoading) return <div>로딩 중...</div>;
