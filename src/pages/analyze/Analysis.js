@@ -5,6 +5,8 @@ import { ReactComponent as VideoImage } from "../../assets/images/VideoImage.svg
 import { ReactComponent as ArrowIcon } from "../../assets/images/ArrowIcon.svg";
 import CommonButton from "../../common/CommonButton";
 import { useWebSocket } from "../../common/WebSocketProvider";
+import { useNavigate } from "react-router-dom";
+import eventBus from "../../utils/eventBus";
 
 const TitleStyle = styled.p`
   margin: 0;
@@ -84,21 +86,63 @@ const Video = styled.video`
   transform: scaleX(-1);
 `;
 
+const BackText = styled.button`
+  margin: 8px 0 0;
+  font-size: ${(props) => props.theme.fontSize.sm};
+  color: ${(props) => props.theme.color.black};
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  border: 0px;
+  text-align: center;
+`;
+
 const Analysis = () => {
   const [start, setStart] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("");
   const [cameras, setCameras] = useState([]);
   const [stream, setStream] = useState(null);
+  const navigate = useNavigate();
+
   const videoRef = useRef(null);
   const { startWebSocket, stopWebSocket, sendImageData, isConnected } =
     useWebSocket();
 
+  // 카메라 종료 함수
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    stopWebSocket();
+    setStart(false);
+  };
+
+  // 로그아웃 이벤트 구독
+  useEffect(() => {
+    const unsubscribe = eventBus.subscribe("STOP_CAMERA", () => {
+      console.log("카메라 종료 이벤트 수신");
+      stopCamera();
+    });
+
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe();
+    };
+  }, [stream]);
+
+  // 컴포넌트 언마운트 시 카메라 종료
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
   useEffect(() => {
     const getCameras = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-
+        // 카메라 목록만 가져오고 실제로 카메라는 켜지 않도록 수정
         const devices = await navigator.mediaDevices.enumerateDevices();
 
         const videoDevices = devices.filter(
@@ -167,12 +211,7 @@ const Analysis = () => {
         console.error("카메라 접근 오류:", error);
       }
     } else {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-      }
-      stopWebSocket();
-      setStart(false);
+      stopCamera();
     }
   };
 
@@ -219,6 +258,12 @@ const Analysis = () => {
     return () => clearInterval(interval);
   }, [start, stream, sendImageData, isConnected]);
 
+  const goToMain = () => {
+    // 메인으로 이동 시 카메라 종료
+    stopCamera();
+    navigate("/main");
+  };
+
   return (
     <CommonRoot>
       <TitleStyle>자세 측정</TitleStyle>
@@ -253,6 +298,7 @@ const Analysis = () => {
         children={start ? "측정 중지" : "측정 시작"}
         onClick={handleClickButton}
       />
+      <BackText onClick={goToMain}>메인으로 이동</BackText>
     </CommonRoot>
   );
 };
