@@ -4,7 +4,7 @@ import DayChart from './DayChart';
 import MonthChart from './MonthChart';
 
 const Root = styled.div`
-    width: 800px;
+    width: 1000px;
     min-height: ${(props) => `calc(100vh - ${props.theme.headerHeight})`};
     display: flex;
     flex-direction: column;
