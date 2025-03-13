@@ -248,7 +248,8 @@ const SignUp = () => {
         />
         <CommonButton
           outline={gender === "남" ? false : true}
-          onClick={() => setGender("남")}
+          onClick={() => setGender("남")} // 성별 남 선택
+          {...ButtonProps}
         >
           남
         </CommonButton>
