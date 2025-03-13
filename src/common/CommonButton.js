@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import instance from "../api/axios";
 
 const ButtonStyle = styled.button`
   width: ${(props) => props.width || "50px"};
@@ -13,6 +14,15 @@ const ButtonStyle = styled.button`
   font-weight: bold;
   cursor: pointer;
 `;
+
+const handleClick = async () => {
+    try{
+        await instance.post(`/api/user/${children}`);
+        navigate("/main");
+    }catch(error){
+        console.error('버튼 클릭 오류:', error);
+    }
+}
 
 const CommonButton = ({
   children,
@@ -30,7 +40,7 @@ const CommonButton = ({
       $outline={outline}
       fontSize={fontSize}
       $background={background}
-      onClick={onClick}
+      onClick={handleClick}
     >
       {children}
     </ButtonStyle>
