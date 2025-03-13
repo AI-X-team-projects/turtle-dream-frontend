@@ -52,6 +52,7 @@ const CommonDialog = ({
     onClick,
     title,
     children,
+    onKeyDown
 }) => {
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -70,7 +71,7 @@ const CommonDialog = ({
     }, [open, onClose]);
 
     return (
-        <DialogStyle onClose={onClose} open={open}>
+        <DialogStyle onClose={onClose} open={open} onKeyDown={onKeyDown}>
             <TitleBox>
                 <TitleStyle>{title}</TitleStyle>
                 <IconButton onClick={onClose}><CloseIcon /></IconButton>

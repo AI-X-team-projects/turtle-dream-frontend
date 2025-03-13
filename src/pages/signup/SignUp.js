@@ -256,6 +256,7 @@ const SignUp = () => {
         <CommonButton
           outline={gender === "여" ? false : true}
           onClick={() => setGender("여")}
+          {...ButtonProps}
         >
           여
         </CommonButton>

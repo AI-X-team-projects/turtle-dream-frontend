@@ -23,7 +23,8 @@ const CommonButton = ({
   height,
   outline = false,
   onClick,
-  background
+  background,
+  onKeyDown
 }) => {
   const navigate = useNavigate();
 
@@ -48,9 +49,11 @@ const CommonButton = ({
       fontSize={fontSize}
       $background={background}
       onClick={handleClick}
+      onKeyDown={onKeyDown}
+      tabIndex={0}
     >
       {children}
-    </ButtonStyle>
+    </ButtonStyle >
   );
 };
 

@@ -87,6 +87,14 @@ const Header = () => {
     );
   }
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setDialogOpen(false);
+      navigate("/"); // 로그인 페이지로 이동
+    }
+  };
+
   return (
     <Root>
       <Logo onClick={goToMain} />
@@ -95,6 +103,7 @@ const Header = () => {
         open={dialogOpen}
         onClick={handleCloseDialog}
         onClose={handleCloseDialog}
+        onKeyDown={handleKeyDown}
         children={<MessageStyle>{dialogMessage}</MessageStyle>}
       />
     </Root>
