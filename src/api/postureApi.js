@@ -15,9 +15,11 @@ export const postureApi = {
     },
 
     // 월별 자세 데이터 조회
-    getMonthlyPosture: async (year, month) => {
+    getMonthlyPosture: async (userId, year, month) => {
         try {
-            const response = await axios.get(`/api/posture/monthly?year=${year}&month=${month}`);
+            const response = await axios.get(`/api/posture/monthly?year=${year}&month=${month}`, {
+                params: { userId, year, month }
+            });
             return response.data;
         } catch (error) {
             throw error;
