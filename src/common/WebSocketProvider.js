@@ -224,12 +224,13 @@ export const WebSocketProvider = ({ children, userId }) => {
    * @param {string} imageData - Base64 인코딩된 이미지 데이터
    * WebSocket을 통해 서버로 이미지 데이터를 전송
    */
-  const sendImageData = (imageData) => {
-    if (!ws.current) {
-      console.error("WebSocket 인스턴스가 없습니다.");
-      return;
+  const sendImageToWebSocket = (imageFile) => {
+    if (!imageFile) {
+        console.error("❌ 에러: 이미지 파일이 존재하지 않습니다.");
+        return;
     }
 
+<<<<<<< HEAD
     if (ws.current.readyState !== WS_READY_STATE.OPEN) {
       console.error("WebSocket 연결 상태:", {
         readyState: ws.current.readyState,
@@ -257,7 +258,69 @@ export const WebSocketProvider = ({ children, userId }) => {
     } catch (error) {
       console.error("이미지 전송 중 오류:", error);
     }
+=======
+    if (!(imageFile instanceof Blob)) {
+        console.error("❌ 에러: imageFile이 Blob 타입이 아님", imageFile);
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        const base64Image = reader.result; // 'data:image/png;base64,...' 형식으로 변환됨
+        console.log("📷 Base64 변환 성공:", base64Image.substring(0, 100)); // 디버깅용
+
+        sendImageData(base64Image);
+    };
+
+    reader.onerror = (error) => {
+        console.error("❌ FileReader 에러 발생:", error);
+    };
+
+    reader.readAsDataURL(imageFile);
+};
+
+    // 🔹 WebSocket을 통해 이미지 데이터 전송
+    const sendImageData = (imageData) => {
+      if (!ws.current) {
+          console.error("❌ WebSocket 인스턴스가 없습니다.");
+          return;
+      }
+
+      if (typeof imageData !== "string") {
+          console.error("❌ 에러: imageData가 Base64 문자열이 아님", imageData);
+          return;
+      }
+
+      console.log("📤 WebSocket 전송 Base64 데이터 길이:", imageData.length);
+      console.log("📤 WebSocket 전송 Base64 데이터 앞 100자:", imageData.substring(0, 100));
+
+      if (ws.current.readyState !== WebSocket.OPEN) {
+          console.error("❌ WebSocket 연결 상태 문제:", {
+              readyState: ws.current.readyState,
+              isConnected: isConnected,
+          });
+          return;
+      }
+
+      try {
+          const message = JSON.stringify({
+              type: "IMAGE",
+              userId: userId,
+              image: imageData,  // MIME 타입 포함된 Base64 데이터
+          });
+
+          console.log("📤 WebSocket 최종 전송 데이터:", message);
+
+          ws.current.send(message);
+          console.log("✅ 이미지 데이터 전송 완료, userId:", userId);
+      } catch (error) {
+          console.error("❌ 이미지 전송 중 오류:", error);
+          ws.current.close();
+      }
+>>>>>>> 83681f6260abc4d6f32fce2fa89cb1d21fdb4144
   };
+
 
   /**
    * WebSocket 연결 시작 함수
