@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
@@ -16,7 +16,7 @@ const ButtonStyle = styled.button`
   cursor: pointer;
 `;
 
-const CommonButton = ({
+const CommonButton = forwardRef(({
   children,
   fontSize,
   width,
@@ -25,7 +25,7 @@ const CommonButton = ({
   onClick,
   background,
   onKeyDown
-}) => {
+}, ref) => {
   const navigate = useNavigate();
 
   const handleClick = async (e) => {
@@ -41,6 +41,7 @@ const CommonButton = ({
 
   return (
     <ButtonStyle
+      ref={ref} // forwardRef 적용
       width={width}
       height={height}
       $outline={outline}
@@ -48,11 +49,10 @@ const CommonButton = ({
       $background={background}
       onClick={handleClick}
       onKeyDown={onKeyDown}
-      tabIndex={0}
     >
       {children}
     </ButtonStyle >
   );
-};
+});
 
 export default CommonButton;
