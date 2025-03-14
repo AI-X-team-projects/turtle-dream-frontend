@@ -234,6 +234,7 @@ export const WebSocketProvider = ({ children, userId }) => {
       console.error("WebSocket 연결 상태:", {
         readyState: ws.current.readyState,
         isConnected: isConnected,
+        readyStateText: Object.keys(WS_READY_STATE).find(key => WS_READY_STATE[key] === ws.current.readyState)
       });
       return;
     }
@@ -242,10 +243,17 @@ export const WebSocketProvider = ({ children, userId }) => {
       const message = JSON.stringify({
         type: "IMAGE",
         userId: userId || localStorage.getItem("userId") || "anonymous",
-        imageData: imageData,
+        imageData: imageData.substring(0, 50) + "..." // base64 데이터 일부만 로깅
       });
+      
+      console.log("전송할 메시지:", {
+        type: "IMAGE",
+        userId: userId || localStorage.getItem("userId") || "anonymous",
+        imageDataLength: imageData.length
+      });
+      
       ws.current.send(message);
-      console.log("이미지 데이터 전송 완료");
+      console.log("이미지 데이터 전송 완료 (크기:", imageData.length, "bytes)");
     } catch (error) {
       console.error("이미지 전송 중 오류:", error);
     }

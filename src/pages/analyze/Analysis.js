@@ -226,41 +226,104 @@ const Analysis = () => {
   const handleClickButton = async () => {
     if (!start) {
       try {
+        // 기존 스트림이 있다면 정리
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+
+        // 선택된 카메라 찾기
         const selectedDevice = cameras.find(
           (camera) => (camera.label || "알 수 없는 카메라") === selected
         );
 
+        // 카메라 접근 설정
         const constraints = {
           video: selectedDevice
             ? {
-              deviceId: { exact: selectedDevice.deviceId },
-              width: { ideal: 500 },
-              height: { ideal: 281 },
-            }
+                deviceId: { exact: selectedDevice.deviceId },
+                width: { ideal: 500 },
+                height: { ideal: 281 },
+                frameRate: { ideal: 30 }
+              }
             : {
-              width: { ideal: 500 },
-              height: { ideal: 281 },
-            },
-          audio: false,
+                width: { ideal: 500 },
+                height: { ideal: 281 },
+                frameRate: { ideal: 30 }
+              },
+          audio: false
         };
 
-        const mediaStream = await navigator.mediaDevices.getUserMedia(
-          constraints
-        );
+        console.log("선택된 카메라:", selected);
+        console.log("카메라 접근 시도...");
+        
+        // 먼저 기존 미디어 장치 열거
+        await navigator.mediaDevices.enumerateDevices();
+        
+        // 카메라 접근 시도
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        // 스트림의 트랙 정보 확인
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        if (videoTrack) {
+          console.log("비디오 트랙 획득 성공:", videoTrack.label);
+          console.log("트랙 설정:", videoTrack.getSettings());
+        }
+
+        // 스트림 설정
         setStream(mediaStream);
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          await videoRef.current.play();
+        }
 
         // WebSocket 연결 시작
         startWebSocket();
         setStart(true);
       } catch (error) {
-        console.error("카메라 접근 오류:", error);
-        alert(`카메라 접근 오류: ${error.message}`);
+        console.error("카메라 접근 오류 상세:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        
+        let errorMessage = "카메라 접근 오류가 발생했습니다.\n";
+        
+        switch(error.name) {
+          case "NotReadableError":
+            errorMessage += "카메라가 다른 앱에서 사용 중입니다.\n";
+            errorMessage += "1. 작업 관리자를 열어 카메라를 사용 중인 프로세스를 확인하고 종료해주세요.\n";
+            errorMessage += "2. 컴퓨터를 재시작해주세요.";
+            break;
+          case "NotAllowedError":
+            errorMessage += "카메라 접근 권한이 거부되었습니다.\n";
+            errorMessage += "1. 브라우저 설정 → 개인정보 및 보안 → 카메라에서 권한을 허용해주세요.\n";
+            errorMessage += "2. Windows 설정 → 개인정보 → 카메라에서 권한을 확인해주세요.";
+            break;
+          case "NotFoundError":
+            errorMessage += "카메라를 찾을 수 없습니다.\n";
+            errorMessage += "1. 장치 관리자에서 카메라가 정상적으로 인식되는지 확인해주세요.\n";
+            errorMessage += "2. 카메라 드라이버를 재설치해보세요.";
+            break;
+          default:
+            errorMessage += `오류: ${error.message}\n`;
+            errorMessage += "1. 브라우저를 완전히 종료 후 재시작해보세요.\n";
+            errorMessage += "2. 다른 브라우저(예: Edge, Firefox)로 시도해보세요.";
+        }
+        
+        alert(errorMessage);
+        
+        // 에러 발생 시 상태 초기화
+        setStream(null);
+        setStart(false);
       }
     } else {
       stopCamera();
     }
   };
 
+
+  //1초마다 실행되는 이미지 캡쳐 및 전송 로직
   useEffect(() => {
     if (!start || !stream || !isConnected) return;
 
@@ -274,6 +337,7 @@ const Analysis = () => {
     const interval = setInterval(() => {
       if (videoRef.current && isConnected) {
         try {
+          //1.비디오 프레임을 캔버스에 그리기
           context.drawImage(
             videoRef.current,
             0,
@@ -281,19 +345,27 @@ const Analysis = () => {
             canvas.width,
             canvas.height
           );
+
+          //2.캔버스의 이미지를 Blob으로 변환
           canvas.toBlob(
             (blob) => {
               const reader = new FileReader();
-              reader.onloadend = () => {
+                reader.onloadend = () => {
+                //3.Blob을 Base64로 변환
                 const base64data = reader.result.split(",")[1];
                 if (isConnected) {
+                  console.log("이미지 변환 완료:", {
+                    originalSize: blob.size,
+                    base64Size: base64data.length,
+                    timestamp: new Date().toISOString()
+                  });
                   sendImageData(base64data);
                 }
               };
               reader.readAsDataURL(blob);
             },
             "image/jpeg",
-            0.8
+            0.95
           );
         } catch (error) {
           console.error("이미지 캡처 중 오류:", error);
@@ -304,6 +376,10 @@ const Analysis = () => {
     return () => clearInterval(interval);
   }, [start, stream, sendImageData, isConnected]);
 
+  // 여기까지가카메라 이미지를 base64로 변환하고 websocket 서버로 전송하는 로직
+
+
+  
   const goToMain = () => {
     // 메인으로 이동 시 카메라 종료
     stopCamera();
