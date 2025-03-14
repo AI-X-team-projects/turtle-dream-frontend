@@ -28,16 +28,14 @@ const CommonButton = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleClick = async () => {
+  const handleClick = async (e) => {
     try {
       if (onClick) {
-        onClick();
-      } else {
-        await instance.post(`/api/user/${children}`);
-        navigate("/main");
+        await onClick(e);
       }
     } catch (error) {
       console.error('버튼 클릭 오류:', error);
+      // 사용자에게 오류 메시지를 표시하는 로직 추가 가능
     }
   };
 

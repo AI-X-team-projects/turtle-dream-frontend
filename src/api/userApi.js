@@ -15,6 +15,11 @@ export const userApi = {
   login: async (userData) => {
     try {
       const response = await axios.post("/api/user/login", userData);
+      if (response.data && response.data.Id) {
+        localStorage.setItem("userId", response.data.Id);
+        localStorage.setItem("username", response.data.username);
+      }
+      console.log("api 파일 로그인 응답 : ", response.data);
       return response.data;
     } catch (error) {
       throw error;
