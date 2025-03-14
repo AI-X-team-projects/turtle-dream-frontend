@@ -8,10 +8,10 @@ export const postureApi = {
             const response = await axios.get(`/api/posture/daily`, {
                 params: { userId, date }
             });
-            console.log("📡 서버 응답 (일일 자세 데이터): ", response.data);
+            console.log("서버 응답 (일일 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
-            console.error("❌ API 요청 실패 : ", error);
+            console.error("API 요청 실패 : ", error);
             throw error;
         }
     },
@@ -22,10 +22,10 @@ export const postureApi = {
             const response = await axios.get(`/api/posture/monthly`, {
                 params: { userId, year, month }
             });
-            console.log("📡 서버 응답 (월별 자세 데이터): ", response.data);
+            console.log("서버 응답 (월별 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
-            console.error("❌ API 요청 실패:", error);
+            console.error("API 요청 실패:", error);
             throw error;
         }
     },
