@@ -8,8 +8,10 @@ export const postureApi = {
             const response = await axios.get(`/api/posture/daily`, {
                 params: { userId, date }
             });
+            console.log("서버 응답 (일일 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
+            console.error("API 요청 실패 : ", error);
             throw error;
         }
     },
@@ -17,24 +19,39 @@ export const postureApi = {
     // 월별 자세 데이터 조회
     getMonthlyPosture: async (userId, year, month) => {
         try {
-            const response = await axios.get(`/api/posture/monthly?year=${year}&month=${month}`, {
+            const response = await axios.get(`/api/posture/monthly`, {
                 params: { userId, year, month }
             });
+            console.log("서버 응답 (월별 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
+            console.error("API 요청 실패:", error);
             throw error;
         }
     },
 
     // AI 자세 분석 요청
-    analyzePosture: async (userId) => {
+    analyzePosture : async (userId, base64Image) => {
         try {
-            const response = await axios.post(`/api/ai/analyze?userId=${userId}`);
-            return response.data;
+            console.log("전송할 userId:", userId);
+            console.log("전송할 이미지 데이터:", base64Image.substring(0, 100)); // 데이터 일부만 출력
+            const response = await fetch('http://localhost:8001/analyze-posture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    image: base64Image,
+                }),
+            });
+            const data = await response.json();
+            console.log("AI 서버 응답:", data);
         } catch (error) {
-            throw error;
+            console.error("AI 서버 요청 오류:", error);
         }
-    },
+    },    
+    
 
     // 자세 트렌드 조회
     getPostureTrends: async (userId, periodType) => {
