@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import DayChart from './DayChart';
-import MonthChart from './MonthChart';
+import DayChart from './DayChart_20250313';
+import MonthChart from './MonthChart_20250313';
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from '../../assets/images/ArrowIcon.svg';
 
