@@ -63,5 +63,15 @@ export const postureApi = {
         } catch (error) {
             throw error;
         }
-    }
+    },
+    // AI 조언 가져오기 (GPT 4 버전)
+    getAiAdvice: async (userId) => {
+        try {
+            const response = await axios.get(`/api/posture/feedback/test-feedback/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    
 }; 

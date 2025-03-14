@@ -39,11 +39,12 @@ const TextStyle = styled.p`
     color: ${(props) => props.theme.color.black};
     margin-top: 16px;
 `;
-
+const userId = localStorage.getItem("username");
 const DayChart = () => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [advice, setAdvice] = useState("");
 
     // 테스트용 데이터 생성 함수
     const generateTestData = () => {
@@ -73,8 +74,19 @@ const DayChart = () => {
             data: generateTestData()
         }];
         setChartData(testData);
+        const fetchAdvice = async() => {
+            try{
+                const result_advice = await postureApi.getAiAdvice(userId);
+                setAdvice(result_advice); 
+            }
+            catch(error){
+                console.error("Model을 가져오는데 실패했습니다.",error);
+            }
+        }
+        fetchAdvice();
         setIsLoading(false);
-
+        
+        
         // API 연동 코드는 주석 처리
         /*
         const fetchDailyData = async () => {
@@ -104,7 +116,7 @@ const DayChart = () => {
 
         fetchDailyData();
         */
-    }, []);
+    }, [userId]);
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -176,7 +188,7 @@ const DayChart = () => {
             <TextBoxStyle>
                 <TitleStyle>나쁜 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>30분 간격으로 나쁜 자세가 발생한 횟수를 확인해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</TextStyle>
+                <TextStyle>{advice !== null ? advice : "Loading..."}</TextStyle>
             </TextBoxStyle >
         </Root>
     );
