@@ -42,7 +42,7 @@ const Main = () => {
     }
     
     const ButtonProps = {
-        width: '255px',
+        width: '295px',
     };
 
     return (
