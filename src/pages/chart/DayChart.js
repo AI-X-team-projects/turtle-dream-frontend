@@ -43,6 +43,7 @@ const TextStyle = styled.p`
 
 const DayChart = () => {
     const [chartData, setChartData] = useState([]);
+    const [maxYValue, setMaxYValue] = useState(200); // 기본값 200
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -73,7 +74,7 @@ const DayChart = () => {
                 response.forEach((item) => {
                     if (!item.recordedAt) return;
     
-                    // 여기서 시간(HH) 추출 예를들어 16시나 17시
+                    // 시간(HH) 추출
                     const hour = item.recordedAt.split("T")[1]?.substring(0, 2) + "시" || "Unknown";
     
                     // 그룹화하여 badPostureDuration 누적
@@ -82,8 +83,8 @@ const DayChart = () => {
                     }
                     groupedData[hour] += item.badPostureDuration || 0;
                 });
-    
-                // 여기서 차트 형식으로 변환
+
+                // 데이터 변환
                 const transformedData = [
                     {
                         id: "나쁜 자세 횟수",
@@ -93,10 +94,14 @@ const DayChart = () => {
                                 x: hour, // 시간(HH시)
                                 y: groupedData[hour], // badPostureDuration 총합
                             }))
-                            .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬 (09시, 10시, ... 17시)
+                            .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
                     },
                 ];
-    
+
+                // 최대값 찾기 (y축 최대값을 동적으로 설정)
+                const maxDataValue = Math.max(...transformedData[0].data.map((d) => d.y), 200); // 최소 200
+                setMaxYValue(maxDataValue + 100); // 최대값 + 100 적용
+
                 setChartData(transformedData);
                 setError(null);
             } catch (err) {
@@ -123,7 +128,7 @@ const DayChart = () => {
                     yScale={{
                         type: "linear",
                         min: 0,
-                        max: 200,
+                        max: maxYValue,
                         stacked: false,
                         reverse: false,
                     }}
