@@ -35,6 +35,13 @@ const TextStyleAdvice = styled.p`
     margin-top: 16px;
     white-space: pre-line;
 `;
+const TextStyleAdvice = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.base};
+    color: ${(props) => props.theme.color.black};
+    margin-top: 16px;
+    white-space: pre-line;
+`;
 
 const LineStyle = styled.div`
   width: 120px;
@@ -48,6 +55,50 @@ const TextStyle = styled.p`
   font-size: ${(props) => props.theme.fontSize.base};
   color: ${(props) => props.theme.color.black};
   margin-top: 16px;
+`;
+
+const Controls = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    margin-left: 30px;
+    & label {
+        font-size: ${(props) => props.theme.fontSize.base};
+        color: ${(props) => props.theme.color.black};
+        font-weight: 600;
+    }
+    & p {
+        margin: 0px;
+    }
+`;
+
+const Select = styled.select`
+    padding: 5px 10px 5px 5px;
+    font-size: ${(props) => props.theme.fontSize.base};
+    background-color: #fff;
+    color: ${(props) => props.theme.color.black};
+    border: 1px solid ${(props) => props.theme.color.grey};
+    border-radius: 8px;
+    margin-left: 12px;
+    &:focus {
+        outline: none;
+    }
+    & option {
+        font-size: ${(props) => props.theme.fontSize.sm};
+        color: ${(props) => props.theme.color.black};
+    }
+    /* 스크롤바 스타일 */
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color:${(props) => props.theme.color.grey};
+        border-radius: 8px;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: #f0f0f0;
+    }
 `;
 
 const Controls = styled.div`
@@ -170,14 +221,14 @@ const DayChart = () => {
             }
         };
 
-        const fetchAdvice = async() => {
-                    try{
-                        const result_advice = await postureApi.getAiDailyAdvice(userId);
-                        setAdvice(result_advice); 
-                    }
-                    catch(error){
-                        console.error("Model을 가져오는데 실패했습니다.",error);
-                    }
+        const fetchAdvice = async () => {
+            try {
+                const result_advice = await postureApi.getAiDailyAdvice(userId);
+                setAdvice(result_advice);
+            }
+            catch (error) {
+                console.error("Model을 가져오는데 실패했습니다.", error);
+            }
         }
         fetchAdvice();
         setIsLoading(false);
