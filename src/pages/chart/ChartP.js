@@ -7,11 +7,13 @@ import { ReactComponent as ArrowIcon } from '../../assets/images/ArrowIcon.svg';
 
 const Root = styled.div`
     width: 1000px;
-    min-height: ${(props) => `calc(100vh - ${props.theme.headerHeight})`};
+    min-height: ${(props) => `calc(100vh - ${props.theme.headerHeight} - 40px)`};
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px 0;
+    box-sizing: border-box
 `;
 
 const BackBox = styled.div`
@@ -68,18 +70,18 @@ const ChartP = () => {
     return (
         <Root>
             <BackBox>
-                <BackText onClick={goToMain}><ArrowIcon/> 메인으로 이동</BackText>
+                <BackText onClick={goToMain}><ArrowIcon /> 메인으로 이동</BackText>
             </BackBox>
-    
+
             <TitleStyle>자세 분석</TitleStyle>
             <Box>
-                <ButtonStyle 
+                <ButtonStyle
                     $isActive={chartType === 'day'}
                     onClick={() => setChartType('day')}
                 >
                     일일 분석
                 </ButtonStyle >
-                <ButtonStyle  
+                <ButtonStyle
                     $isActive={chartType === 'month'}
                     onClick={() => setChartType('month')}
                 >

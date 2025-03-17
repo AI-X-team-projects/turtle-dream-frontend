@@ -5,6 +5,7 @@ import CommonTextField from "../../common/CommonTextField";
 import CommonButton from "../../common/CommonButton";
 import { userApi } from "../../api/userApi";
 import { useNavigate } from "react-router-dom";
+import CommonDialog from "../../common/CommonDialog";
 
 const Root = styled(CommonRoot)`
   & > input {
@@ -40,6 +41,14 @@ const TextStyle = styled.p`
   text-align: center;
 `;
 
+const MessageStyle = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSize.base};
+  color: ${(props) => props.theme.color.black};
+  text-align: center;
+  font-weight: 800;
+`;
+
 const SignUp = () => {
   const navigate = useNavigate();
   const [gender, setGender] = useState("남");
@@ -52,6 +61,9 @@ const SignUp = () => {
   const [height, setHeight] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogMessage, setDialogMessage] = useState("")
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -131,8 +143,11 @@ const SignUp = () => {
         // 사용자 정보 저장
         localStorage.setItem("userId", response.userId || response.id);
         localStorage.setItem("username", response.username);
-        alert("회원가입이 완료되었습니다.");
-        navigate("/");
+        //alert("회원가입이 완료되었습니다.");
+        setDialogOpen(true);
+        setDialogMessage("회원가입이 완료되었습니다.");
+        setSignUpSuccess(true);
+        //navigate("/");
       } else {
         throw new Error("서버 응답 데이터가 올바르지 않습니다.");
       }
@@ -140,7 +155,10 @@ const SignUp = () => {
       console.error("회원가입 실패", error);
       const errorMessage =
         error.response?.data?.message || "회원 가입에 실패했습니다.";
-      alert(errorMessage);
+
+      setDialogOpen(true);
+      setDialogMessage(errorMessage);
+      // alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -160,13 +178,15 @@ const SignUp = () => {
 
       if (isAvailable) {
         setErrors((prev) => ({ ...prev, username: null }));
-        alert("사용 가능한 아이디입니다.");
+        //alert("사용 가능한 아이디입니다.");
+        setDialogOpen(true);
+        setDialogMessage("사용 가능한 아이디입니다.");
       } else {
         setErrors((prev) => ({
           ...prev,
           username: "이미 사용 중인 아이디입니다.",
         }));
-        alert("이미 사용 중인 아이디입니다.");
+        //alert("이미 사용 중인 아이디입니다.");
       }
     } catch (error) {
       console.error("아이디 중복 확인 실패", error);
@@ -176,7 +196,9 @@ const SignUp = () => {
         username:
           error.response?.data?.message || "아이디 중복 확인에 실패했습니다.",
       }));
-      alert("아이디 중복 확인에 실패했습니다.");
+      //alert("아이디 중복 확인에 실패했습니다.");
+      setDialogOpen(true);
+      setDialogMessage("아이디 중복 확인에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -187,6 +209,21 @@ const SignUp = () => {
     setUsername(value);
     setUserNameAvailable(null);
     setErrors((prev) => ({ ...prev, username: null }));
+  };
+
+  // 다이얼로그 닫기
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    if (signUpSuccess) {
+      navigate("/"); // 회원가입 성공시에 로그인 페이지로 이동
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleCloseDialog();
+    }
   };
 
   const InputProps = {
@@ -293,6 +330,14 @@ const SignUp = () => {
       >
         회원가입
       </CommonButton>
+
+      <CommonDialog
+        open={dialogOpen}
+        onClick={handleCloseDialog}
+        onClose={handleCloseDialog}
+        onKeyDown={handleKeyDown}
+        children={<MessageStyle>{dialogMessage}</MessageStyle>}
+      />
     </Root>
   );
 };

@@ -18,6 +18,7 @@ const TextBoxStyle = styled.div`
     background: ${(props) => props.theme.color.lightGreen};
     border-radius: 8px;
     box-shadow: 0 1px 4px 2px rgb(119 119 119 / 25%);
+    box-sizing: border-box;
 `;
 
 const TitleStyle = styled.p`
@@ -56,27 +57,27 @@ const DayChart = () => {
                 setIsLoading(true);
                 console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
                 const response = await postureApi.getDailyPosture(userId, today);
-    
+
                 console.log("서버 응답:", response);
-    
+
                 if (!response || !Array.isArray(response)) {
                     console.error("서버 응답이 올바르지 않습니다.", response);
                     setChartData([]);
                     return;
                 }
-    
+
                 // 1시간 단위 그룹화 (09시~18시 모든 시간을 포함)
                 const groupedData = {};
                 for (let hour = 9; hour < 18; hour++) {
                     groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
                 }
-    
+
                 response.forEach((item) => {
                     if (!item.recordedAt) return;
-    
+
                     // 시간(HH) 추출
                     const hour = item.recordedAt.split("T")[1]?.substring(0, 2) + "시" || "Unknown";
-    
+
                     // 그룹화하여 badPostureDuration 누적
                     if (!groupedData[hour]) {
                         groupedData[hour] = 0;
@@ -111,9 +112,9 @@ const DayChart = () => {
                 setIsLoading(false);
             }
         };
-    
+
         fetchDailyData();
-    }, [userId, today]);    
+    }, [userId, today]);
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
