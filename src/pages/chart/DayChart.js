@@ -169,14 +169,14 @@ const DayChart = () => {
             }
         };
 
-        const fetchAdvice = async () => {
-            try {
-                const result_advice = await postureApi.getAiDailyAdvice(userId);
-                setAdvice(result_advice);
-            }
-            catch (error) {
-                console.error("Model을 가져오는데 실패했습니다.", error);
-            }
+        const fetchAdvice = async() => {
+                    try{
+                        const result_advice = await postureApi.getAiAdvice(userId);
+                        setAdvice(result_advice); 
+                    }
+                    catch(error){
+                        console.error("Model을 가져오는데 실패했습니다.",error);
+                    }
         }
         fetchAdvice();
         setIsLoading(false);

@@ -45,6 +45,8 @@ const TitleStyle = styled.p`
 
 const Box = styled.div`
     width: 100%;
+    display: flex;
+    justify-content: center;
 `;
 
 const ButtonStyle = styled.button`
