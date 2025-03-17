@@ -112,5 +112,10 @@ export const postureApi = {
             throw error;
         }
     },
-    
+
+    getTopBadPostureHours: async (userId, startDate, endDate) => {
+        const response = await axios.get(`/api/posture/badPostureHours`, { params: { userId, startDate, endDate } });
+        return response.data;
+    },
+
 }; 
