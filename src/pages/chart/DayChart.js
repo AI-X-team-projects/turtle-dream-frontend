@@ -66,9 +66,9 @@ const DayChart = () => {
                     return;
                 }
 
-                // 1시간 단위 그룹화 (09시~18시 모든 시간을 포함)
+                // 1시간 단위 그룹화 (09시~21시 모든 시간을 포함)
                 const groupedData = {};
-                for (let hour = 9; hour < 18; hour++) {
+                for (let hour = 10; hour < 22; hour++) {
                     groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
                 }
 
