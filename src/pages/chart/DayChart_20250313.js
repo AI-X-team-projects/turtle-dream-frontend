@@ -46,7 +46,7 @@ const DayChart = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const userId = localStorage.getItem("userId") || "defaultUser";
+    const userId = localStorage.getItem("username") || "defaultUser";
     const today = new Date().toISOString().split("T")[0];
 
     useEffect(() => {

@@ -64,7 +64,7 @@ const MonthChart = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const userId = localStorage.getItem("userId");
+    const userId = localStorage.getItem("username");
     const year = new Date().getFullYear();
     const month = new Date().getMonth() + 1; // JS에서 getMonth()는 0부터 시작하므로 +1 해야됨
 
