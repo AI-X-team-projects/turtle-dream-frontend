@@ -17,10 +17,10 @@ export const postureApi = {
     },
 
     // 월별 자세 데이터 조회
-    getMonthlyPosture: async (userId, year, month) => {
+    getMonthlyPosture: async (userId, startDate, endDate) => {
         try {
             const response = await axios.get(`/api/posture/monthly`, {
-                params: { userId, year, month }
+                params: { userId, startDate, endDate } 
             });
             console.log("서버 응답 (월별 자세 데이터): ", response.data);
             return response.data;
@@ -29,6 +29,7 @@ export const postureApi = {
             throw error;
         }
     },
+
 
     // AI 자세 분석 요청
     analyzePosture : async (userId, base64Image) => {
