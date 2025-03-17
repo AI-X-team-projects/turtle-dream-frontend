@@ -123,7 +123,7 @@ const DayChart = () => {
                     yScale={{
                         type: "linear",
                         min: 0,
-                        max: 12,
+                        max: 100,
                         stacked: false,
                         reverse: false,
                     }}
