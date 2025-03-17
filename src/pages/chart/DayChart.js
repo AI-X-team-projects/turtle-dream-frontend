@@ -42,11 +42,26 @@ const TextStyle = styled.p`
     margin-top: 16px;
 `;
 
+const Controls = styled.div`
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+`;
+
+const Select = styled.select`
+    padding: 5px;
+    font-size: ${(props) => props.theme.fontSize.base};
+`;
+
+
+
 const DayChart = () => {
     const [chartData, setChartData] = useState([]);
     const [maxYValue, setMaxYValue] = useState(200); // 기본값 200
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [startHour, setStartHour] = useState(9); // 기본값: 9시
+    const [endHour, setEndHour] = useState(18); // 기본값: 18시
 
     const userId = localStorage.getItem("username") || "defaultUser";
     const today = new Date().toISOString().split("T")[0];
@@ -55,53 +70,56 @@ const DayChart = () => {
         const fetchDailyData = async () => {
             try {
                 setIsLoading(true);
-                // console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
                 const response = await postureApi.getDailyPosture(userId, today);
-                // console.log("서버 응답:", response);
               
                 if (!response || !Array.isArray(response)) {
                     console.error("서버 응답이 올바르지 않습니다.", response);
-                    setChartData([]);
+                    setChartData([]); // 오류 발생 방지
                     return;
                 }
-
-                // 1시간 단위 그룹화 (09시~21시 모든 시간을 포함)
+    
+                // 사용자가 설정한 시작 시간과 종료 시간 반영
                 const groupedData = {};
-                for (let hour = 10; hour < 22; hour++) {
-                    groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
+                for (let hour = startHour; hour <= endHour; hour++) {
+                    groupedData[`${hour}시`] = 0;
                 }
-
+    
                 response.forEach((item) => {
                     if (!item.recordedAt) return;
-
-                    // 시간(HH) 추출
-                    const hour = item.recordedAt.split("T")[1]?.substring(0, 2) + "시" || "Unknown";
-
-                    // 그룹화하여 badPostureDuration 누적
-                    if (!groupedData[hour]) {
-                        groupedData[hour] = 0;
+    
+                    const hour = parseInt(item.recordedAt.split("T")[1]?.substring(0, 2), 10);
+                    if (hour >= startHour && hour <= endHour) {
+                        const hourLabel = `${hour}시`;
+                        if (!groupedData[hourLabel]) {
+                            groupedData[hourLabel] = 0;
+                        }
+                        groupedData[hourLabel] += item.badPostureDuration || 0;
                     }
-                    groupedData[hour] += item.badPostureDuration || 0;
                 });
-
-                // 데이터 변환
+    
                 const transformedData = [
                     {
                         id: "나쁜 자세 횟수",
                         color: "#3B604B",
                         data: Object.keys(groupedData)
                             .map((hour) => ({
-                                x: hour, // 시간(HH시)
-                                y: groupedData[hour], // badPostureDuration 총합
+                                x: hour,
+                                y: groupedData[hour],
                             }))
                             .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
                     },
                 ];
-
-                // 최대값 찾기 (y축 최대값을 동적으로 설정)
-                const maxDataValue = Math.max(...transformedData[0].data.map((d) => d.y), 200); // 최소 200
-                setMaxYValue(maxDataValue + 100); // 최대값 + 100 적용
-
+    
+                // 🔹 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
+                if (!transformedData[0]?.data.length) {
+                    console.warn("변환된 데이터가 비어 있음", transformedData);
+                    setChartData([]);
+                    return;
+                }
+    
+                const maxDataValue = Math.max(...transformedData[0].data.map((d) => d.y), 200);
+                setMaxYValue(maxDataValue + 100);
+    
                 setChartData(transformedData);
                 setError(null);
             } catch (err) {
@@ -111,15 +129,39 @@ const DayChart = () => {
                 setIsLoading(false);
             }
         };
-
+    
         fetchDailyData();
-    }, [userId, today]);
+    }, [userId, today, startHour, endHour]); 
+    
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
 
     return (
         <Root>
+            <Controls>
+                <label>
+                    시작 시간:
+                    <Select value={startHour} onChange={(e) => setStartHour(parseInt(e.target.value))}>
+                        {Array.from({ length: 24 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {i}시
+                            </option>
+                        ))}
+                    </Select>
+                </label>
+                <label>
+                    종료 시간:
+                    <Select value={endHour} onChange={(e) => setEndHour(parseInt(e.target.value))}>
+                        {Array.from({ length: 24 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {i}시
+                            </option>
+                        ))}
+                    </Select>
+                </label>
+            </Controls>
+
             <ChartBox>
                 <ResponsiveLine
                     data={chartData}
