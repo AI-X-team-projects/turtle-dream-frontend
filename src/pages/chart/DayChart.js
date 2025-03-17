@@ -171,7 +171,7 @@ const DayChart = () => {
 
         const fetchAdvice = async() => {
                     try{
-                        const result_advice = await postureApi.getAiAdvice(userId);
+                        const result_advice = await postureApi.getAiDailyAdvice(userId);
                         setAdvice(result_advice); 
                     }
                     catch(error){
