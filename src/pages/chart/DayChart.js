@@ -44,16 +44,47 @@ const TextStyle = styled.p`
 
 const Controls = styled.div`
     display: flex;
+    align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-top: 16px;
+    margin-left: 30px;
+    & label {
+        font-size: ${(props) => props.theme.fontSize.base};
+        color: ${(props) => props.theme.color.black};
+        font-weight: 600;
+    }
+    & p {
+        margin: 0px;
+    }
 `;
 
 const Select = styled.select`
-    padding: 5px;
+    padding: 5px 10px 5px 5px;
     font-size: ${(props) => props.theme.fontSize.base};
+    background-color: #fff;
+    color: ${(props) => props.theme.color.black};
+    border: 1px solid ${(props) => props.theme.color.grey};
+    border-radius: 8px;
+    margin-left: 12px;
+    &:focus {
+        outline: none;
+    }
+    & option {
+        font-size: ${(props) => props.theme.fontSize.sm};
+        color: ${(props) => props.theme.color.black};
+    }
+    /* 스크롤바 스타일 */
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color:${(props) => props.theme.color.grey};
+        border-radius: 8px;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: #f0f0f0;
+    }
 `;
-
-
 
 const DayChart = () => {
     const [chartData, setChartData] = useState([]);
@@ -72,22 +103,22 @@ const DayChart = () => {
             try {
                 setIsLoading(true);
                 const response = await postureApi.getDailyPosture(userId, today);
-              
+
                 if (!response || !Array.isArray(response)) {
                     console.error("서버 응답이 올바르지 않습니다.", response);
                     setChartData([]); // 오류 발생 방지
                     return;
                 }
-    
+
                 // 사용자가 설정한 시작 시간과 종료 시간 반영
                 const groupedData = {};
                 for (let hour = startHour; hour <= endHour; hour++) {
                     groupedData[`${hour}시`] = 0;
                 }
-    
+
                 response.forEach((item) => {
                     if (!item.recordedAt) return;
-    
+
                     const hour = parseInt(item.recordedAt.split("T")[1]?.substring(0, 2), 10);
                     if (hour >= startHour && hour <= endHour) {
                         const hourLabel = `${hour}시`;
@@ -97,7 +128,7 @@ const DayChart = () => {
                         groupedData[hourLabel] += item.badPostureDuration || 0;
                     }
                 });
-    
+
                 const transformedData = [
                     {
                         id: "나쁜 자세 횟수",
@@ -110,17 +141,17 @@ const DayChart = () => {
                             .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
                     },
                 ];
-    
+
                 // 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
                 if (!transformedData[0]?.data.length) {
                     console.warn("변환된 데이터가 비어 있음", transformedData);
                     setChartData([]);
                     return;
                 }
-    
+
                 const maxDataValue = Math.max(...transformedData[0].data.map((d) => d.y), 200);
                 setMaxYValue(maxDataValue + 100);
-    
+
                 setChartData(transformedData);
                 setError(null);
             } catch (err) {
@@ -131,20 +162,20 @@ const DayChart = () => {
             }
         };
 
-        const fetchAdvice = async() => {
-                    try{
-                        const result_advice = await postureApi.getAiAdvice(userId);
-                        setAdvice(result_advice); 
-                    }
-                    catch(error){
-                        console.error("Model을 가져오는데 실패했습니다.",error);
-                    }
+        const fetchAdvice = async () => {
+            try {
+                const result_advice = await postureApi.getAiAdvice(userId);
+                setAdvice(result_advice);
+            }
+            catch (error) {
+                console.error("Model을 가져오는데 실패했습니다.", error);
+            }
         }
         fetchAdvice();
-        setIsLoading(false);   
+        setIsLoading(false);
         fetchDailyData();
-    }, [userId, today, startHour, endHour]); 
-    
+    }, [userId, today, startHour, endHour]);
+
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -162,6 +193,7 @@ const DayChart = () => {
                         ))}
                     </Select>
                 </label>
+                <p> ~ </p>
                 <label>
                     종료 시간:
                     <Select value={endHour} onChange={(e) => setEndHour(parseInt(e.target.value))}>
@@ -177,7 +209,7 @@ const DayChart = () => {
             <ChartBox>
                 <ResponsiveLine
                     data={chartData}
-                    margin={{ top: 50, right: 100, bottom: 50, left: 60 }}
+                    margin={{ top: 30, right: 100, bottom: 50, left: 60 }}
                     xScale={{ type: "point" }}
                     yScale={{
                         type: "linear",
