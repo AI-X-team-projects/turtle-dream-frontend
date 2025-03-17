@@ -85,12 +85,12 @@ const MonthChart = () => {
                 // toISOString() 대신 toLocaleDateString("ko-KR") 사용
                 const startDate = range[0].startDate.toLocaleDateString("sv-SE"); // YYYY-MM-DD 형식 유지
                 const endDate = range[0].endDate.toLocaleDateString("sv-SE");
-
-                console.log(`요청: /api/posture/monthly?userId=${userId}&startDate=${startDate}&endDate=${endDate}`);
+    
+                // console.log(`요청: /api/posture/monthly?userId=${userId}&startDate=${startDate}&endDate=${endDate}`);
                 const response = await postureApi.getMonthlyPosture(userId, startDate, endDate);
-
-                console.log("서버 응답:", response);
-
+    
+                // console.log("서버 응답:", response);
+    
                 if (!response || !Array.isArray(response)) {
                     console.warn("서버 응답이 잘못되었습니다.", response);
                     setChartData([]);
