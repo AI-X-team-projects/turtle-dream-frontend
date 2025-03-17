@@ -1,10 +1,11 @@
-import React, {useState} from "react";
-import { ResponsiveBar } from '@nivo/bar';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import { ResponsiveBar } from "@nivo/bar";
+import styled from "styled-components";
 import { DateRange } from "react-date-range";
-import "react-date-range/dist/styles.css"; // 기본 스타일
-import "react-date-range/dist/theme/default.css"; // 테마 스타일
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 import { ko } from "date-fns/locale";
+import { postureApi } from "../../api/postureApi";
 
 const Root = styled.div`
     width: 100%;
@@ -42,8 +43,9 @@ const TitleStyle = styled.p`
     color: ${(props) => props.theme.color.green};
     font-weight: 800;
 `;
+
 const LineStyle = styled.div`
-    width:120px;
+    width: 120px;
     height: 2px;
     background: ${(props) => props.theme.color.green};
     margin-top: 5px;
@@ -56,80 +58,148 @@ const TextStyle = styled.p`
     margin-top: 16px;
 `;
 
-const MonthChart = () => {
-    const [range, setRange] = useState([
-        {
-          startDate: new Date(),
-          endDate: new Date(),
-          key: "selection",
-        },
-    ]);
+const Message = styled.p`
+    font-size: ${(props) => props.theme.fontSize.lg};
+    color: ${(props) => props.theme.color.green};
+    font-weight: 600;
+    text-align: center;
+    margin: 0px;
+    margin-top: 220px;
+`;
 
-    // 월별 데이터 (좋은 자세와 나쁜 자세를 하나의 객체로 통합)
-    const data = [
-        { month: '1월', '좋은 자세': 120, '나쁜 자세': 80 },
-        { month: '2월', '좋은 자세': 198, '나쁜 자세': 98 },
-        { month: '3월', '좋은 자세': 87, '나쁜 자세': 107 },
-        { month: '4월', '좋은 자세': 145, '나쁜 자세': 205 }
-    ];
+
+const MonthChart = () => {
+    const [range, setRange] = useState([{ startDate: new Date(), endDate: new Date(), key: "selection" }]);
+    const [chartData, setChartData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const userId = localStorage.getItem("username");
+
+    useEffect(() => {
+        const fetchMonthlyData = async () => {
+            try {
+                setIsLoading(true);
+    
+                // toISOString() 대신 toLocaleDateString("ko-KR") 사용
+                const startDate = range[0].startDate.toLocaleDateString("sv-SE"); // YYYY-MM-DD 형식 유지
+                const endDate = range[0].endDate.toLocaleDateString("sv-SE");
+    
+                console.log(`요청: /api/posture/monthly?userId=${userId}&startDate=${startDate}&endDate=${endDate}`);
+                const response = await postureApi.getMonthlyPosture(userId, startDate, endDate);
+    
+                console.log("서버 응답:", response);
+    
+                if (!response || !Array.isArray(response)) {
+                    console.warn("서버 응답이 잘못되었습니다.", response);
+                    setChartData([]);
+                    return;
+                }
+    
+                // summaryDate를 직접 변환 없이 그대로 사용
+                const transformedData = response.map(item => ({
+                    month: item.summaryDate.substring(5, 10), // MM-DD 형식으로 변환
+                    "좋은 자세": item.goodPostureCount ?? 0,
+                    "나쁜 자세": item.badPostureCount ?? 0,
+                }));
+    
+                setChartData(transformedData);
+                setError(null);
+            } catch (err) {
+                setError("데이터를 불러오는데 실패했습니다.");
+                console.error("API 오류:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        fetchMonthlyData();
+    }, [userId, range]);  
+    
+    
+
+    if (isLoading) return <div>로딩 중...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <Root>
             <Box>
+                {/* 선택한 날짜 범위 저장 */}
                 <DateRange
                     ranges={range}
                     onChange={(item) => setRange([item.selection])}
                     moveRangeOnFirstSelection={false}
-                    rangeColors={["#3B604B"]} // 선택한 날짜 색상 (짙은 녹색)
-                    locale={ko} // 한국어 설정
+                    rangeColors={["#3B604B"]}
+                    locale={ko}
                 />
                 <ChartBox>
+                    {/* 데이터가 없을 경우 "데이터가 없습니다" 문구 출력 */}
+                    {chartData.length === 0 ? (
+                        <Message>선택한 기간에 대한 데이터가 없습니다.</Message>
+                    ) : (
                     <ResponsiveBar
-                        data={data}
-                        keys={['좋은 자세', '나쁜 자세']}
+                        data={chartData}
+                        keys={["좋은 자세", "나쁜 자세"]}
                         indexBy="month"
                         margin={{ top: 50, right: 100, bottom: 50, left: 60 }}
                         padding={0.3}
                         groupMode="grouped"
-                        valueScale={{ type: 'linear' }}
-                        indexScale={{ type: 'band', round: true }}
-                        colors={['#3B604B', '#FFB6C1']} // 좋은 자세는 연한 초록색, 나쁜 자세는 연한 빨간색
-                        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+                        valueScale={{ type: "linear" }}
+                        indexScale={{ type: "band", round: true }}
+                        colors={["#3B604B", "#FFB6C1"]}
+                        borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
                         axisTop={null}
                         axisRight={null}
-                    
-                        labelSkipWidth={12}
-                        labelSkipHeight={12}
-                        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+                        axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: -45,
+                            legend: "날짜",
+                            legendPosition: "middle",
+                            legendOffset: 40,
+                        }}
+                        axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "횟수",
+                            legendPosition: "middle",
+                            legendOffset: -50,
+                        }}
+                        enableGridY={true}
+                        enableLabel={true}
                         legends={[
                             {
-                                dataFrom: 'keys',
-                                anchor: 'bottom-right',
-                                direction: 'column',
+                                dataFrom: "keys",
+                                anchor: "bottom-right",
+                                direction: "column",
                                 justify: false,
                                 translateX: 120,
                                 translateY: 0,
                                 itemsSpacing: 2,
                                 itemWidth: 100,
                                 itemHeight: 20,
-                                itemDirection: 'left-to-right',
+                                itemDirection: "left-to-right",
                                 itemOpacity: 0.85,
-                                symbolSize: 20
-                            }
+                                symbolSize: 20,
+                            },
                         ]}
                         role="application"
                         ariaLabel="월별 자세 분석"
-                        barAriaLabel={e => `${e.id}: ${e.formattedValue}회`}
+                        barAriaLabel={(e) => `${e.id}: ${e.formattedValue}회`}
                     />
+                    )}
                 </ChartBox>
             </Box>
             <TextBoxStyle>
                 <TitleStyle>월별 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>월별 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.</TextStyle>
+                <TextStyle>
+                    선택한 날짜 범위에서 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요.
+                </TextStyle>
             </TextBoxStyle>
         </Root>
     );
 };
 
-export default MonthChart; 
+export default MonthChart;
