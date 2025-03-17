@@ -15,6 +15,7 @@ const Root = styled.div`
 const Box = styled.div`
     display: flex;
     justify-content: space-between;
+    margin-bottom: 16px;
     & .rdrCalendarWrapper {
         display: flex;
         flex-direction: column;
@@ -25,15 +26,42 @@ const Box = styled.div`
     }
 `;
 
+const LeftBox = styled.div`
+    flex-direction: column;
+    align-items: center; 
+`;
+
+const CalenderBox = styled.div`
+    border: 1px solid ${(props) => props.theme.color.grey};
+    margin-bottom: 10px;
+`;
+
+
 const ChartBox = styled.div`
     width: calc(100% - 352px);
-    height: 60vh;
+    height: 638px;
+    display:flex;
+    justify-content:center;
+    align-items: center;
 `;
 
 const SmallChartBox = styled.div`
     width: 100%;
     height: 300px;
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 0px;
+    box-sizing: border-box;
+    border: 1px solid ${(props) => props.theme.color.grey};
+    box-sizing: border-box;
+    padding-top: 10px;
+`;
+
+const BadMessageBox = styled.div`
+    height: 250px;
+    display:flex;
+    justify-content:center;
+    align-items: center;
 `;
 
 const TextBoxStyle = styled.div`
@@ -50,6 +78,14 @@ const TitleStyle = styled.p`
     font-size: ${(props) => props.theme.fontSize.md};
     color: ${(props) => props.theme.color.green};
     font-weight: 800;
+`;
+
+const BadTextStyle = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.sm};
+    color: ${(props) => props.theme.color.black};
+    font-weight: 800;
+    text-align: center
 `;
 
 const LineStyle = styled.div`
@@ -73,7 +109,6 @@ const Message = styled.p`
     font-weight: 600;
     text-align: center;
     margin: 0px;
-    margin-top: 220px;
 `;
 
 const MonthChart = () => {
@@ -161,47 +196,67 @@ const MonthChart = () => {
 
     return (
         <Root>
-            <SmallChartBox>
-                <TitleStyle>가장 나쁜 자세를 기록한 시간대</TitleStyle>
-                <LineStyle />
-                {topBadPostureHours.length === 0 ? (
-                    <Message>해당 기간에 대한 데이터가 없습니다.</Message>
-                ) : (
-                    <ResponsivePie
-                        data={topBadPostureHours.map(item => ({
-                            id: item.time, // 시간대가 아이디
-                            label: item.time, // 라벨
-                            value: item["나쁜 자세 횟수"], // 나쁜 자세 횟수
-                        }))}
-                        margin={{ top: 50, right: 80, bottom: 50, left: 80 }}
-                        innerRadius={0.5} // 도넛 모양
-                        padAngle={0.7}
-                        cornerRadius={3}
-                        colors={{ scheme: "red_yellow_blue" }} // 색상 스키마
-                        borderWidth={1}
-                        borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
-                        radialLabelsSkipAngle={10}
-                        radialLabelsTextXOffset={6}
-                        radialLabelsTextColor="#333333"
-                        radialLabelsLinkOffset={0}
-                        radialLabelsLinkDiagonalLength={16}
-                        radialLabelsLinkHorizontalLength={24}
-                        radialLabelsLinkStrokeWidth={1}
-                        radialLabelsLinkColor={{ from: "color" }}
-                        sliceLabelsSkipAngle={10}
-                        sliceLabelsTextColor="#ffffff"
-                    />
-                )}
-            </SmallChartBox>
-
             <Box>
-                <DateRange
-                    ranges={range}
-                    onChange={(item) => setRange([item.selection])}
-                    moveRangeOnFirstSelection={false}
-                    rangeColors={["#3B604B"]}
-                    locale={ko}
-                />
+                <LeftBox>
+                    <CalenderBox>
+                        <DateRange
+                            ranges={range}
+                            onChange={(item) => setRange([item.selection])}
+                            moveRangeOnFirstSelection={false}
+                            rangeColors={["#3B604B"]}
+                            locale={ko}
+                        />  
+                    </CalenderBox>
+                    
+
+                    <SmallChartBox>
+                        <BadTextStyle>가장 나쁜 자세를 기록한 시간대</BadTextStyle>
+                        {topBadPostureHours.length === 0 ? (
+                            <BadMessageBox>
+                                <Message>해당 기간에 대한 데이터가 없습니다.</Message>
+                            </BadMessageBox>
+                            
+                        ) : (
+                            <ResponsivePie
+                                // data={[
+                                //     { id: "12 AM", label: "12 AM", value: 5 },
+                                //     { id: "3 AM", label: "3 AM", value: 8 },
+                                //     { id: "6 AM", label: "6 AM", value: 3 },
+                                //     { id: "9 AM", label: "9 AM", value: 12 },
+                                //     { id: "12 PM", label: "12 PM", value: 6 },
+                                //     { id: "3 PM", label: "3 PM", value: 7 },
+                                //     { id: "6 PM", label: "6 PM", value: 4 },
+                                //     { id: "9 PM", label: "9 PM", value: 9 },
+                                // ]}
+                                data={topBadPostureHours.map(item => ({
+                                    id: item.time, // 시간대가 아이디
+                                    label: item.time, // 라벨
+                                    value: item["나쁜 자세 횟수"], // 나쁜 자세 횟수
+                                }))}
+                                margin={{ top: 50, right: 80, bottom: 50, left: 80 }}
+                                innerRadius={0.5} // 도넛 모양
+                                padAngle={0.7}
+                                cornerRadius={3}
+                                // colors={["#3B604B", "#4A755C", "#5D8D6D", "#74A282", "#8CB897", "#A5D6A7"]}
+                                // colors={["#B22222", "#C0392B", "#D64545", "#E57373", "#F28B82", "#FFB6C1"]}
+                                colors={{ scheme: "red_yellow_blue" }} // 색상 스키마
+                                borderWidth={1}
+                                borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
+                                radialLabelsSkipAngle={10}
+                                radialLabelsTextXOffset={6}
+                                radialLabelsTextColor="#333333"
+                                radialLabelsLinkOffset={0}
+                                radialLabelsLinkDiagonalLength={16}
+                                radialLabelsLinkHorizontalLength={24}
+                                radialLabelsLinkStrokeWidth={1}
+                                radialLabelsLinkColor={{ from: "color" }}
+                                sliceLabelsSkipAngle={10}
+                                sliceLabelsTextColor="#ffffff"
+                            />
+                        )}
+                    </SmallChartBox>
+                </LeftBox>
+               
                 <ChartBox>
                     {chartData.length === 0 ? (
                         <Message>선택한 기간에 대한 데이터가 없습니다.</Message>
