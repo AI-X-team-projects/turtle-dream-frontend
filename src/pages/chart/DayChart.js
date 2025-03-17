@@ -1,7 +1,7 @@
-import { ResponsiveLine } from '@nivo/line';
-import styled from 'styled-components';
-import { useEffect, useState } from 'react';
-import { postureApi } from '../../api/postureApi';
+import React, { useState, useEffect } from "react";
+import { ResponsiveLine } from "@nivo/line";
+import styled from "styled-components";
+import { postureApi } from "../../api/postureApi";
 
 const Root = styled.div`
     width: 100%;
@@ -26,8 +26,9 @@ const TitleStyle = styled.p`
     color: ${(props) => props.theme.color.green};
     font-weight: 800;
 `;
+
 const LineStyle = styled.div`
-    width:120px;
+    width: 120px;
     height: 2px;
     background: ${(props) => props.theme.color.green};
     margin-top: 5px;
@@ -39,84 +40,75 @@ const TextStyle = styled.p`
     color: ${(props) => props.theme.color.black};
     margin-top: 16px;
 `;
-const userId = localStorage.getItem("username");
+
 const DayChart = () => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [advice, setAdvice] = useState("");
 
-    // 테스트용 데이터 생성 함수
-    const generateTestData = () => {
-        const data = [];
-        const startHour = 9;
-        const endHour = 18;
-
-        for (let hour = startHour; hour <= endHour; hour++) {
-            for (let minute = 0; minute < 60; minute += 30) {
-                const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                // 0에서 18 사이의 랜덤한 값 생성
-                const badPostureCount = Math.floor(Math.random() * 12);
-                data.push({
-                    x: time,
-                    y: badPostureCount
-                });
-            }
-        }
-        return data;
-    };
+    const userId = localStorage.getItem("username") || "defaultUser";
+    const today = new Date().toISOString().split("T")[0];
 
     useEffect(() => {
-        // API 연동 전 테스트 데이터 사용
-        const testData = [{
-            id: "나쁜 자세 횟수",
-            color: "#3B604B",
-            data: generateTestData()
-        }];
-        setChartData(testData);
-        const fetchAdvice = async() => {
-            try{
-                const result_advice = await postureApi.getAiAdvice(userId);
-                setAdvice(result_advice); 
-            }
-            catch(error){
-                console.error("Model을 가져오는데 실패했습니다.",error);
-            }
-        }
-        fetchAdvice();
-        setIsLoading(false);
-        
-        
-        // API 연동 코드는 주석 처리
-        /*
         const fetchDailyData = async () => {
             try {
                 setIsLoading(true);
-                const today = new Date().toISOString().split('T')[0];
-                const response = await postureApi.getDailyPosture(today);
-                
-                const transformedData = [{
-                    id: "나쁜 자세 횟수",
-                    color: "#3B604B",
-                    data: response.data.map(item => ({
-                        x: item.time, // 이 부분 recordedAt으로 사용 백엔드에 time 없음
-                        y: item.badPostureCount
-                    }))
-                }];
-                
+                console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
+                const response = await postureApi.getDailyPosture(userId, today);
+    
+                console.log("서버 응답:", response);
+    
+                if (!response || !Array.isArray(response)) {
+                    console.error("서버 응답이 올바르지 않습니다.", response);
+                    setChartData([]);
+                    return;
+                }
+    
+                // 1시간 단위 그룹화 (09시~18시 모든 시간을 포함)
+                const groupedData = {};
+                for (let hour = 9; hour < 18; hour++) {
+                    groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
+                }
+    
+                response.forEach((item) => {
+                    if (!item.recordedAt) return;
+    
+                    // 여기서 시간(HH) 추출 예를들어 16시나 17시
+                    const hour = item.recordedAt.split("T")[1]?.substring(0, 2) + "시" || "Unknown";
+    
+                    // 그룹화하여 badPostureDuration 누적
+                    if (!groupedData[hour]) {
+                        groupedData[hour] = 0;
+                    }
+                    groupedData[hour] += item.badPostureDuration || 0;
+                });
+    
+                // 여기서 차트 형식으로 변환
+                const transformedData = [
+                    {
+                        id: "나쁜 자세 횟수",
+                        color: "#3B604B",
+                        data: Object.keys(groupedData)
+                            .map((hour) => ({
+                                x: hour, // 시간(HH시)
+                                y: groupedData[hour], // badPostureDuration 총합
+                            }))
+                            .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬 (09시, 10시, ... 17시)
+                    },
+                ];
+    
                 setChartData(transformedData);
                 setError(null);
             } catch (err) {
-                setError('데이터를 불러오는데 실패했습니다.');
-                console.error('Error fetching daily posture data:', err);
+                setError("데이터를 불러오는데 실패했습니다.");
+                console.error("❌ API 오류:", err);
             } finally {
                 setIsLoading(false);
             }
         };
-
+    
         fetchDailyData();
-        */
-    }, [userId]);
+    }, [userId, today]);    
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -126,14 +118,14 @@ const DayChart = () => {
             <ChartBox>
                 <ResponsiveLine
                     data={chartData}
-                    margin={{ top: 50, right: 0, bottom: 70, left: 60 }}
-                    xScale={{ type: 'point' }}
+                    margin={{ top: 50, right: 100, bottom: 50, left: 60 }}
+                    xScale={{ type: "point" }}
                     yScale={{
-                        type: 'linear',
+                        type: "linear",
                         min: 0,
-                        max: 18,
+                        max: 100,
                         stacked: false,
-                        reverse: false
+                        reverse: false,
                     }}
                     curve="monotoneX"
                     axisTop={null}
@@ -143,22 +135,15 @@ const DayChart = () => {
                         tickPadding: 5,
                         tickRotation: -45,
                         legendOffset: 50,
-                        legendPosition: 'middle',
-                        tickValues: chartData[0]?.data
-                            .filter((_, index) => index % 2 === 0)
-                            .map(d => d.x)
+                        legendPosition: "middle",
                     }}
                     axisLeft={{
                         tickSize: 5,
                         tickPadding: 5,
                         legendOffset: -46,
-                        legendPosition: 'middle',
-                        tickValues: [0, 3, 6, 9, 12, 15, 18]
+                        legendPosition: "middle",
                     }}
                     enableGridX={true}
-                    gridXValues={chartData[0]?.data
-                        .filter((_, index) => index % 2 === 0)
-                        .map(d => d.x)}
                     enableGridY={true}
                     pointSize={4}
                     pointColor="#3B604B"
@@ -173,10 +158,10 @@ const DayChart = () => {
                     tooltip={({ point }) => (
                         <div
                             style={{
-                                background: 'white',
-                                padding: '9px 12px',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px'
+                                background: "white",
+                                padding: "9px 12px",
+                                border: "1px solid #ccc",
+                                borderRadius: "4px",
                             }}
                         >
                             <strong>{point.data.x}</strong>
@@ -188,10 +173,10 @@ const DayChart = () => {
             <TextBoxStyle>
                 <TitleStyle>나쁜 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>{advice !== null ? advice : "Loading..."}</TextStyle>
-            </TextBoxStyle >
+                <TextStyle>1시간 간격으로 나쁜 자세 지속 시간을 확인하세요.</TextStyle>
+            </TextBoxStyle>
         </Root>
     );
 };
 
-export default DayChart; 
+export default DayChart;

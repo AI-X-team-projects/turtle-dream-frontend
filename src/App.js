@@ -11,6 +11,7 @@ import Main from "./pages/main/Main";
 import Analysis from "./pages/analyze/Analysis";
 import { WebSocketProvider } from "./common/WebSocketProvider";
 import { userApi } from "./api/userApi";
+import NotFound from "./pages/NotFound";
 
 const Root = styled.div`
   width: 100%;
@@ -84,6 +85,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
         </Router>
