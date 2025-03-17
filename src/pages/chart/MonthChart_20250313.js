@@ -65,39 +65,34 @@ const MonthChart = () => {
     const [error, setError] = useState(null);
 
     const userId = localStorage.getItem("username");
-    const year = new Date().getFullYear();
-    const month = new Date().getMonth() + 1; // JS에서 getMonth()는 0부터 시작하므로 +1 해야됨
 
     useEffect(() => {
         const fetchMonthlyData = async () => {
             try {
                 setIsLoading(true);
-                console.log(`요청: /api/posture/monthly?userId=${userId}&year=${year}&month=${month}`);
-                const response = await postureApi.getMonthlyPosture(userId, year, month);
-
+    
+                // toISOString() 대신 toLocaleDateString("ko-KR") 사용
+                const startDate = range[0].startDate.toLocaleDateString("sv-SE"); // YYYY-MM-DD 형식 유지
+                const endDate = range[0].endDate.toLocaleDateString("sv-SE");
+    
+                console.log(`요청: /api/posture/monthly?userId=${userId}&startDate=${startDate}&endDate=${endDate}`);
+                const response = await postureApi.getMonthlyPosture(userId, startDate, endDate);
+    
                 console.log("서버 응답:", response);
-
-                // 서버 응답이 배열인지 확인
+    
                 if (!response || !Array.isArray(response)) {
-                    console.warn("❌ 서버 응답이 잘못되었습니다.", response);
+                    console.warn("서버 응답이 잘못되었습니다.", response);
                     setChartData([]);
                     return;
                 }
-
-                // summaryDate가 없을 경우 대비하여 변환
-                const transformedData = response.map(item => {
-                    if (!item.summaryDate) {
-                        console.warn("⚠️ 'summaryDate' 필드가 없습니다. item:", item);
-                        return { month: "Unknown", "좋은 자세": 0, "나쁜 자세": 0 };
-                    }
-
-                    return {
-                        month: `${item.summaryDate?.substring(5, 7) ?? "Unknown"}월`,
-                        "좋은 자세": item.totalGoodPosture ?? 0,
-                        "나쁜 자세": item.totalBadPosture ?? 0,
-                    };
-                });
-
+    
+                // summaryDate를 직접 변환 없이 그대로 사용
+                const transformedData = response.map(item => ({
+                    month: item.summaryDate.substring(5, 10), // MM-DD 형식으로 변환
+                    "좋은 자세": item.goodPostureCount ?? 0,
+                    "나쁜 자세": item.badPostureCount ?? 0,
+                }));
+    
                 setChartData(transformedData);
                 setError(null);
             } catch (err) {
@@ -107,9 +102,11 @@ const MonthChart = () => {
                 setIsLoading(false);
             }
         };
-
+    
         fetchMonthlyData();
-    }, []);
+    }, [userId, range]);  
+    
+    
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -117,12 +114,13 @@ const MonthChart = () => {
     return (
         <Root>
             <Box>
+                {/* 선택한 날짜 범위 저장 */}
                 <DateRange
                     ranges={range}
                     onChange={(item) => setRange([item.selection])}
                     moveRangeOnFirstSelection={false}
-                    rangeColors={["#3B604B"]} // 선택한 날짜 색상 (짙은 녹색)
-                    locale={ko} // 한국어 설정
+                    rangeColors={["#3B604B"]}
+                    locale={ko}
                 />
                 <ChartBox>
                     <ResponsiveBar
@@ -134,7 +132,7 @@ const MonthChart = () => {
                         groupMode="grouped"
                         valueScale={{ type: "linear" }}
                         indexScale={{ type: "band", round: true }}
-                        colors={["#3B604B", "#FFB6C1"]} // 좋은 자세는 연한 초록색, 나쁜 자세는 연한 빨간색
+                        colors={["#3B604B", "#FFB6C1"]}
                         borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
                         axisTop={null}
                         axisRight={null}
@@ -142,7 +140,7 @@ const MonthChart = () => {
                             tickSize: 5,
                             tickPadding: 5,
                             tickRotation: -45,
-                            legend: "월",
+                            legend: "날짜",
                             legendPosition: "middle",
                             legendOffset: 40,
                         }}
@@ -182,7 +180,7 @@ const MonthChart = () => {
                 <TitleStyle>월별 자세 분석</TitleStyle>
                 <LineStyle />
                 <TextStyle>
-                    월별 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요. 추후에 G선생님이 알아서 분석해서 추천해줄 것입니다.
+                    선택한 날짜 범위에서 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요.
                 </TextStyle>
             </TextBoxStyle>
         </Root>
