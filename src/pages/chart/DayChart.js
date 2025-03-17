@@ -57,7 +57,7 @@ const DayChart = () => {
                 console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
                 const response = await postureApi.getDailyPosture(userId, today);
     
-                console.log("서버 응답:", response);
+                // console.log("서버 응답:", response);
     
                 if (!response || !Array.isArray(response)) {
                     console.error("서버 응답이 올바르지 않습니다.", response);

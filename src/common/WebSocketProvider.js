@@ -274,7 +274,7 @@ export const WebSocketProvider = ({ children, userId }) => {
 
     reader.onload = () => {
         const base64Image = reader.result; // 'data:image/png;base64,...' 형식으로 변환됨
-        console.log("Base64 변환 성공:", base64Image.substring(0, 100)); // 디버깅용
+        // console.log("Base64 변환 성공:", base64Image.substring(0, 100));
 
         sendImageData(base64Image);
     };

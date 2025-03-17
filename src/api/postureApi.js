@@ -8,7 +8,7 @@ export const postureApi = {
             const response = await axios.get(`/api/posture/daily`, {
                 params: { userId, date }
             });
-            console.log("서버 응답 (일일 자세 데이터): ", response.data);
+            // console.log("서버 응답 (일일 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
             console.error("API 요청 실패 : ", error);
@@ -22,7 +22,7 @@ export const postureApi = {
             const response = await axios.get(`/api/posture/monthly`, {
                 params: { userId, startDate, endDate } 
             });
-            console.log("서버 응답 (월별 자세 데이터): ", response.data);
+            // console.log("서버 응답 (월별 자세 데이터): ", response.data);
             return response.data;
         } catch (error) {
             console.error("API 요청 실패:", error);
@@ -34,8 +34,8 @@ export const postureApi = {
     // AI 자세 분석 요청
     analyzePosture : async (userId, base64Image) => {
         try {
-            console.log("전송할 userId:", userId);
-            console.log("전송할 이미지 데이터:", base64Image.substring(0, 100)); // 데이터 일부만 출력
+            // console.log("전송할 userId:", userId);
+            // console.log("전송할 이미지 데이터:", base64Image.substring(0, 100)); // 데이터 일부만 출력
             const response = await fetch('http://localhost:8001/analyze-posture', {
                 method: 'POST',
                 headers: {
@@ -47,7 +47,7 @@ export const postureApi = {
                 }),
             });
             const data = await response.json();
-            console.log("AI 서버 응답:", data);
+            // console.log("AI 서버 응답:", data);
         } catch (error) {
             console.error("AI 서버 요청 오류:", error);
         }
