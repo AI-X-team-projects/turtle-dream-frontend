@@ -327,6 +327,39 @@ export const WebSocketProvider = ({ children, userId }) => {
       }
   };
 
+// ------------------------------------------------------------------------------------------------------
+    // ai 서버와 동일하게 상태 변경이 감지될 때만 전송하는 함수
+    // ai 서버의 코드 변경되면 이것도 같이 주석 해제
+//   const sendImageData = (imageData) => {
+//     if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+//         console.error("WebSocket 연결 상태 문제");
+//         return;
+//     }
+
+//     if (typeof imageData !== "string") {
+//         console.error("에러: imageData가 Base64 문자열이 아님", imageData);
+//         return;
+//     }
+
+//     // 현재 자세 상태 비교
+//     const newStatus = postureStatus; // 현재 AI에서 받은 자세 상태
+//     if (newStatus !== prevPostureStatus || Date.now() - lastSentTime >= 30000) {
+//         // 상태가 변경되었거나, 마지막 전송 후 30초 경과 시 전송
+//         prevPostureStatus = newStatus;
+//         lastSentTime = Date.now();
+
+//         const message = JSON.stringify({
+//             type: "IMAGE",
+//             userId: userId,
+//             image: imageData, // MIME 타입 포함된 Base64 데이터
+//         });
+
+//         ws.current.send(message);
+//         console.log("이미지 데이터 전송 완료", newStatus);
+//     }
+// };
+// ------------------------------------------------------------------------------------------------------
+
 
   /**
    * WebSocket 연결 시작 함수
@@ -352,29 +385,6 @@ export const WebSocketProvider = ({ children, userId }) => {
     }
   };
 
-  // useEffect 훅 수정
-  // useEffect(() => {
-  //   console.log("useEffect 실행, isActive:", isActive);
-
-  //   if (isActive) {
-  //     // 약간의 지연 후 연결 시도 (React 렌더링 완료 후)
-  //     const timer = setTimeout(() => {
-  //       connectWebSocket();
-  //     }, 100);
-
-  //     return () => {
-  //       clearTimeout(timer);
-  //     };
-  //   }
-
-  //   return () => {
-  //     if (ws.current) {
-  //       console.log("컴포넌트 언마운트 시 WebSocket 연결 종료");
-  //       ws.current.close();
-  //       ws.current = null;
-  //     }
-  //   };
-  // }, [isActive]);
   useEffect(() => {
     console.log("useEffect 실행, isActive:", isActive);
 
