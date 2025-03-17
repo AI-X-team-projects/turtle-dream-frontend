@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useWebSocket } from "../common/WebSocketProvider";
 
@@ -60,6 +60,34 @@ const PostureFeedback = () => {
     acknowledgeAlert,
     connectionError,
   } = useWebSocket();
+
+  const [lastAlertTime, setLastAlertTime] = useState(0);
+
+  useEffect(() => {
+    if (postureData && !postureData.isGoodPosture) {
+      const badPostureDuration = postureData.badPostureDuration || 0;
+
+      // console.log(`나쁜 자세 유지 시간: ${badPostureDuration}초`);
+      // console.log(`마지막 알림 시간: ${lastAlertTime}초`);
+
+      // 현재 시간이 마지막 알림 이후 5분(300초) 이상인지 확인
+      if (badPostureDuration >= 60 && (badPostureDuration - lastAlertTime) >= 300) {
+        if (Notification.permission === "granted") {
+          new Notification("나쁜 자세 경고", {
+            body: `${Math.floor(badPostureDuration / 60)}분 ${
+              badPostureDuration % 60
+            }초 동안 나쁜 자세를 유지하고 있습니다. 바른 자세로 돌아가세요.`,
+            icon: "/warning-icon.png",
+          });
+
+          // console.log("알림 전송 완료");
+          setLastAlertTime(badPostureDuration);
+        } else {
+          console.log("알림 권한 없음");
+        }
+      }
+    }
+  }, [postureData]);
 
   // 연결되지 않은 경우
   if (!isConnected) {
