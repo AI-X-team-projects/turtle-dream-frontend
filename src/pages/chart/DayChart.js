@@ -62,6 +62,7 @@ const DayChart = () => {
     const [error, setError] = useState(null);
     const [startHour, setStartHour] = useState(9); // 기본값: 9시
     const [endHour, setEndHour] = useState(18); // 기본값: 18시
+    const [advice, setAdvice] = useState("");
 
     const userId = localStorage.getItem("username") || "defaultUser";
     const today = new Date().toISOString().split("T")[0];
@@ -110,7 +111,7 @@ const DayChart = () => {
                     },
                 ];
     
-                // 🔹 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
+                // 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
                 if (!transformedData[0]?.data.length) {
                     console.warn("변환된 데이터가 비어 있음", transformedData);
                     setChartData([]);
@@ -129,7 +130,18 @@ const DayChart = () => {
                 setIsLoading(false);
             }
         };
-    
+
+        const fetchAdvice = async() => {
+                    try{
+                        const result_advice = await postureApi.getAiAdvice(userId);
+                        setAdvice(result_advice); 
+                    }
+                    catch(error){
+                        console.error("Model을 가져오는데 실패했습니다.",error);
+                    }
+        }
+        fetchAdvice();
+        setIsLoading(false);   
         fetchDailyData();
     }, [userId, today, startHour, endHour]); 
     
@@ -220,7 +232,7 @@ const DayChart = () => {
             <TextBoxStyle>
                 <TitleStyle>나쁜 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>1시간 간격으로 나쁜 자세 지속 시간을 확인하세요.</TextStyle>
+                <TextStyle>{advice !== null ? advice : "Loading..."}</TextStyle>
             </TextBoxStyle>
         </Root>
     );
