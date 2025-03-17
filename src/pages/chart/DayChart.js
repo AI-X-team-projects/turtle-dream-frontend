@@ -55,7 +55,7 @@ const DayChart = () => {
         const fetchDailyData = async () => {
             try {
                 setIsLoading(true);
-                console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
+                // console.log(`요청: /api/posture/daily?userId=${userId}&date=${today}`);
                 const response = await postureApi.getDailyPosture(userId, today);
                 // console.log("서버 응답:", response);
               
