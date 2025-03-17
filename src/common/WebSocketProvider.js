@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import SockJS from "sockjs-client";
-import axios from "axios";
 
 /**
  * WebSocket 컨텍스트 생성
@@ -57,6 +56,8 @@ export const WebSocketProvider = ({ children, userId }) => {
   const [currentAlert, setCurrentAlert] = useState(null);
   // 마지막 알림 시간을 저장하는 ref 추가
   const lastAlertTimeRef = useRef({});
+  // 이전 자세 상태를 저장하는 ref 추가
+  const prevPostureRef = useRef({ isGoodPosture: true });
 
   // refs
   const ws = useRef(null); // WebSocket 인스턴스 참조
@@ -73,94 +74,94 @@ export const WebSocketProvider = ({ children, userId }) => {
     if (!isActive) return;
 
     try {
-        // 기존 연결 정리
-        if (ws.current) {
-            console.log("기존 WebSocket 연결 종료");
-            ws.current.close();
-            ws.current = null;
+      // 기존 연결 정리
+      if (ws.current) {
+        console.log("기존 WebSocket 연결 종료");
+        ws.current.close();
+        ws.current = null;
+      }
+
+      // 재연결 타이머 정리
+      if (reconnectTimeout.current) {
+        console.log("재연결 타이머 정리");
+        clearTimeout(reconnectTimeout.current);
+        reconnectTimeout.current = null;
+      }
+
+      // 재연결 횟수 체크
+      if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
+        console.error("WebSocket 최대 재연결 시도 횟수 초과. 연결 중단.");
+        setConnectionError("연결 실패: 서버와 연결할 수 없습니다.");
+        return;
+      }
+
+      // 연결 시도 횟수 증가
+      reconnectAttempts.current += 1;
+
+      console.log(`WebSocket 연결 시도... (시도 ${reconnectAttempts.current})`);
+      setConnectionError(null);
+
+      // SockJS 인스턴스 생성 및 연결 (상대 경로 사용)
+      console.log("SockJS 인스턴스 생성 시작");
+      const sockjs = new SockJS("http://localhost:8080/ws/posture", null, {
+        transports: ["websocket", "xhr-streaming", "xhr-polling"],
+        debug: true,
+      });
+
+      console.log("SockJS 인스턴스 생성됨:", sockjs);
+      console.log("SockJS 상태:", sockjs.readyState);
+      console.log("SockJS URL:", sockjs.url);
+
+      ws.current = sockjs;
+
+      // 연결 성공 이벤트 핸들러
+      ws.current.onopen = () => {
+        console.log("WebSocket 연결 성공!");
+        console.log("WebSocket 상태:", ws.current.readyState);
+        console.log("WebSocket URL:", ws.current.url);
+        console.log("WebSocket 프로토콜:", ws.current.protocol);
+
+        setIsConnected(true);
+        reconnectAttempts.current = 0; // 연결 성공 시 시도 횟수 초기화
+
+        // WebSocket이 정상적으로 열린 경우만 사용자 등록 메시지 전송
+        if (ws.current.readyState === WebSocket.OPEN) {
+          try {
+            const registerMessage = JSON.stringify({
+              type: "REGISTER",
+              userId: userId || localStorage.getItem("username") || "anonymous",
+            });
+            ws.current.send(registerMessage);
+            console.log("사용자 등록 메시지 전송 완료");
+          } catch (error) {
+            console.error("사용자 등록 메시지 전송 중 오류:", error);
+          }
         }
+      };
 
-        // 재연결 타이머 정리
-        if (reconnectTimeout.current) {
-            console.log("재연결 타이머 정리");
-            clearTimeout(reconnectTimeout.current);
-            reconnectTimeout.current = null;
+      // 메시지 수신 핸들러
+      ws.current.onmessage = (event) => {
+        console.log("WebSocket 메시지 수신:", event.data);
+      };
+
+      // WebSocket 오류 처리
+      ws.current.onerror = (error) => {
+        console.error("WebSocket 오류 발생:", error);
+      };
+
+      // WebSocket 닫힐 때 (비정상 종료 포함) → 자동 재연결
+      ws.current.onclose = () => {
+        console.warn("WebSocket 연결 종료됨.");
+
+        ws.current = null; // WebSocket 객체 정리
+
+        if (isActive) {
+          console.log("🔄 WebSocket 재연결 시도...");
+          reconnectTimeout.current = setTimeout(() => {
+            connectWebSocket();
+          }, 3000); // 3초 후 재연결
         }
-
-        // 재연결 횟수 체크
-        if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
-            console.error("WebSocket 최대 재연결 시도 횟수 초과. 연결 중단.");
-            setConnectionError("연결 실패: 서버와 연결할 수 없습니다.");
-            return;
-        }
-
-        // 연결 시도 횟수 증가
-        reconnectAttempts.current += 1;
-
-        console.log(`WebSocket 연결 시도... (시도 ${reconnectAttempts.current})`);
-        setConnectionError(null);
-
-        // SockJS 인스턴스 생성 및 연결 (상대 경로 사용)
-        console.log("SockJS 인스턴스 생성 시작");
-        const sockjs = new SockJS("http://localhost:8080/ws/posture", null, {
-            transports: ["websocket", "xhr-streaming", "xhr-polling"],
-            debug: true,
-        });
-
-        console.log("SockJS 인스턴스 생성됨:", sockjs);
-        console.log("SockJS 상태:", sockjs.readyState);
-        console.log("SockJS URL:", sockjs.url);
-
-        ws.current = sockjs;
-
-        // 연결 성공 이벤트 핸들러
-        ws.current.onopen = () => {
-            console.log("WebSocket 연결 성공!");
-            console.log("WebSocket 상태:", ws.current.readyState);
-            console.log("WebSocket URL:", ws.current.url);
-            console.log("WebSocket 프로토콜:", ws.current.protocol);
-
-            setIsConnected(true);
-            reconnectAttempts.current = 0; // 연결 성공 시 시도 횟수 초기화
-
-            // WebSocket이 정상적으로 열린 경우만 사용자 등록 메시지 전송
-            if (ws.current.readyState === WebSocket.OPEN) {
-                try {
-                    const registerMessage = JSON.stringify({
-                        type: "REGISTER",
-                        userId: userId || localStorage.getItem("username") || "anonymous",
-                    });
-                    ws.current.send(registerMessage);
-                    console.log("사용자 등록 메시지 전송 완료");
-                } catch (error) {
-                    console.error("사용자 등록 메시지 전송 중 오류:", error);
-                }
-            }
-        };
-
-        // 메시지 수신 핸들러
-        ws.current.onmessage = (event) => {
-            console.log("WebSocket 메시지 수신:", event.data);
-        };
-
-        // WebSocket 오류 처리
-        ws.current.onerror = (error) => {
-            console.error("WebSocket 오류 발생:", error);
-        };
-
-        // WebSocket 닫힐 때 (비정상 종료 포함) → 자동 재연결
-        ws.current.onclose = () => {
-            console.warn("WebSocket 연결 종료됨.");
-
-            ws.current = null; // WebSocket 객체 정리
-
-            if (isActive) {
-                console.log("🔄 WebSocket 재연결 시도...");
-                reconnectTimeout.current = setTimeout(() => {
-                    connectWebSocket();
-                }, 3000); // 3초 후 재연결
-            }
-        };
+      };
 
       // 메시지 수신 이벤트 핸들러
       ws.current.onmessage = (event) => {
@@ -176,6 +177,24 @@ export const WebSocketProvider = ({ children, userId }) => {
           // 자세 데이터 업데이트 - 데이터 구조에 맞게 수정
           if (data.message === "이미지 분석 성공" && data.analysis) {
             const analysis = data.analysis;
+
+            // 이전 자세가 좋았는데 현재 자세가 나쁜 경우 (자세가 좋았다가 나빠진 경우)
+            if (
+              prevPostureRef.current.isGoodPosture &&
+              !analysis.is_good_posture
+            ) {
+              console.log(
+                "자세가 좋았다가 나빠졌습니다. 자세 지속 시간을 초기화합니다."
+              );
+              // 서버에서 받은 데이터를 수정하여 지속 시간을 초기화
+              analysis.bad_posture_duration = 0;
+            }
+
+            // 현재 자세 상태 저장
+            prevPostureRef.current = {
+              isGoodPosture: analysis.is_good_posture,
+            };
+
             setPostureData({
               isGoodPosture: analysis.is_good_posture,
               postureStatus: analysis.posture_status,
@@ -191,91 +210,61 @@ export const WebSocketProvider = ({ children, userId }) => {
             ) {
               const now = Date.now();
               const alertType = analysis.posture_status;
-              const lastAlertTime = lastAlertTimeRef.current[alertType] || 0;
 
-              // 같은 유형의 알림은 30초에 한 번만 생성
-              const alertCooldown = 30000; // 30초
+              // 항상 최신 정보로 알림 생성
+              const newAlert = {
+                id: `alert-${alertType}`, // 알림 ID를 타입 기반으로 고정하여 항상 같은 알림을 업데이트하도록 함
+                type: alertType,
+                message: analysis.feedback,
+                description: `${Math.floor(
+                  analysis.bad_posture_duration / 60
+                )}분 ${
+                  analysis.bad_posture_duration % 60
+                }초 동안 나쁜 자세를 유지하고 있습니다.`,
+                severity:
+                  analysis.bad_posture_duration > 300 ? "high" : "medium",
+                timestamp: analysis.recorded_at,
+                acknowledged: false,
+                duration: analysis.bad_posture_duration,
+              };
 
-              // 현재 표시 중인 알림이 있는지 확인
-              const hasExistingAlert =
-                currentAlert &&
-                currentAlert.type === alertType &&
-                !currentAlert.acknowledged;
+              // 현재 알림 업데이트
+              setCurrentAlert(newAlert);
 
-              // 알림 쿨다운 시간이 지났거나, 아직 해당 유형의 알림이 없는 경우에만 새 알림 생성
-              if (now - lastAlertTime > alertCooldown || !hasExistingAlert) {
-                const newAlert = {
-                  id: `alert-${now}`,
-                  type: alertType,
-                  message: analysis.feedback,
-                  description: `${Math.floor(
-                    analysis.bad_posture_duration / 60
-                  )}분 ${
-                    analysis.bad_posture_duration % 60
-                  }초 동안 나쁜 자세를 유지하고 있습니다.`,
-                  severity:
-                    analysis.bad_posture_duration > 300 ? "high" : "medium",
-                  timestamp: analysis.recorded_at,
-                  acknowledged: false,
-                  duration: analysis.bad_posture_duration,
-                };
+              // 알림 목록 업데이트
+              setPostureAlerts((prevAlerts) => {
+                // 같은 유형의 알림이 이미 있는지 확인
+                const existingAlertIndex = prevAlerts.findIndex(
+                  (alert) => alert.type === alertType
+                );
 
-                // 마지막 알림 시간 업데이트
-                lastAlertTimeRef.current[alertType] = now;
-
-                setPostureAlerts((prevAlerts) => {
-                  // 같은 유형의 알림이 이미 있는지 확인
-                  const existingAlertIndex = prevAlerts.findIndex(
-                    (alert) => alert.type === alertType && !alert.acknowledged
-                  );
-
-                  // 같은 유형의 알림이 있으면 업데이트
-                  if (existingAlertIndex >= 0) {
-                    const updatedAlerts = [...prevAlerts];
-                    updatedAlerts[existingAlertIndex] = newAlert;
-                    return updatedAlerts;
-                  }
-
-                  // 새 알림 추가
-                  return [newAlert, ...prevAlerts];
-                });
-
-                // 현재 표시할 알림 업데이트 (기존 알림이 없는 경우에만)
-                if (!currentAlert || currentAlert.type !== alertType) {
-                  setCurrentAlert(newAlert);
-                } else if (currentAlert && currentAlert.type === alertType) {
-                  // 현재 표시 중인 알림이 같은 유형이면 내용만 업데이트
-                  setCurrentAlert(newAlert);
+                // 같은 유형의 알림이 있으면 업데이트
+                if (existingAlertIndex >= 0) {
+                  const updatedAlerts = [...prevAlerts];
+                  updatedAlerts[existingAlertIndex] = newAlert;
+                  return updatedAlerts;
                 }
-              } else if (hasExistingAlert) {
-                // 쿨다운 중이지만 같은 유형의 알림이 표시 중이면 내용만 업데이트
-                setCurrentAlert((prev) => {
-                  if (prev && prev.type === alertType) {
-                    return {
-                      ...prev,
-                      message: analysis.feedback,
-                      description: `${Math.floor(
-                        analysis.bad_posture_duration / 60
-                      )}분 ${
-                        analysis.bad_posture_duration % 60
-                      }초 동안 나쁜 자세를 유지하고 있습니다.`,
-                      severity:
-                        analysis.bad_posture_duration > 300 ? "high" : "medium",
-                      duration: analysis.bad_posture_duration,
-                    };
-                  }
-                  return prev;
-                });
-              }
+
+                // 새 알림 추가
+                return [newAlert, ...prevAlerts];
+              });
             } else if (analysis.is_good_posture && currentAlert) {
               // 자세가 좋아졌을 때 현재 알림이 있으면 자동으로 확인 처리
-              if (currentAlert && !currentAlert.acknowledged) {
-                // 백엔드 API 호출은 하지 않고 로컬 상태만 업데이트
-                setPostureAlerts((prevAlerts) =>
-                  prevAlerts.filter((alert) => alert.id !== currentAlert.id)
+              console.log("자세가 좋아졌습니다. 알림을 자동으로 제거합니다.");
+
+              // 알림 목록에서 현재 알림 제거
+              setPostureAlerts((prevAlerts) => {
+                return prevAlerts.filter(
+                  (alert) => alert.id !== currentAlert.id
                 );
-                setCurrentAlert(null);
-              }
+              });
+
+              // 현재 알림 초기화
+              setCurrentAlert(null);
+
+              // 마지막 알림 시간 초기화 (모든 알림 타입에 대해)
+              lastAlertTimeRef.current = {};
+              console.log("마지막 알림 시간 초기화됨");
             }
           }
 
@@ -424,13 +413,13 @@ export const WebSocketProvider = ({ children, userId }) => {
    */
   const sendImageToWebSocket = (imageFile) => {
     if (!imageFile) {
-        console.error("에러: 이미지 파일이 존재하지 않습니다.");
-        return;
+      console.error("에러: 이미지 파일이 존재하지 않습니다.");
+      return;
     }
 
     if (!(imageFile instanceof Blob)) {
-        console.error("에러: imageFile이 Blob 타입이 아님", imageFile);
-        return;
+      console.error("에러: imageFile이 Blob 타입이 아님", imageFile);
+      return;
     }
 
     const reader = new FileReader();
@@ -535,101 +524,45 @@ export const WebSocketProvider = ({ children, userId }) => {
     console.log("useEffect 실행, isActive:", isActive);
 
     if (isActive) {
-        // 약간의 지연 후 WebSocket 연결 시도
-        const timer = setTimeout(() => {
-            connectWebSocket();
-        }, 100);
+      // 약간의 지연 후 WebSocket 연결 시도
+      const timer = setTimeout(() => {
+        connectWebSocket();
+      }, 100);
 
-        return () => {
-            clearTimeout(timer);
-            if (ws.current) {
-                console.log("WebSocket 종료 중...");
-                ws.current.onclose = null;  // 이벤트 핸들러 제거
-                ws.current.close();
-                ws.current = null;  // 안전하게 null 처리
-            }
-        };
+      return () => {
+        clearTimeout(timer);
+        if (ws.current) {
+          console.log("WebSocket 종료 중...");
+          ws.current.onclose = null; // 이벤트 핸들러 제거
+          ws.current.close();
+          ws.current = null; // 안전하게 null 처리
+        }
+      };
     }
-}, [isActive]);
-
-
+  }, [isActive]);
 
   /**
    * 알림 확인 처리 함수
    * @param {string} alertId - 확인할 알림의 ID
    */
-  const acknowledgeAlert = async (alertId) => {
-    try {
-      // 백엔드 API 호출 URL 수정 (3000 -> 8080)
-      await axios.post(
-        `http://localhost:8080/api/posture/alerts/acknowledge/${alertId}`
-      );
+  const acknowledgeAlert = (alertId) => {
+    // 로컬 상태만 업데이트
+    setPostureAlerts((prevAlerts) => {
+      return prevAlerts.filter((alert) => alert.id !== alertId);
+    });
 
-      // 로컬 상태 업데이트
-      setPostureAlerts((prevAlerts) => {
-        const updatedAlerts = prevAlerts.map((alert) =>
-          alert.id === alertId ? { ...alert, acknowledged: true } : alert
-        );
-        return updatedAlerts.filter((alert) => !alert.acknowledged);
-      });
-
-      // 현재 알림 업데이트
-      setCurrentAlert((prev) => {
-        if (prev && prev.id === alertId) {
-          // 다음 알림이 있으면 표시
-          const nextAlert = postureAlerts.find(
-            (alert) => alert.id !== alertId && !alert.acknowledged
-          );
-          return nextAlert || null;
-        }
-        return prev;
-      });
-
-      console.log(`알림 ID ${alertId} 확인 처리 완료`);
-    } catch (error) {
-      console.error("알림 확인 처리 중 오류:", error);
-    }
-  };
-
-  /**
-   * 알림 목록 가져오기 함수
-   * @param {string} userId - 사용자 ID
-   */
-  const fetchPostureAlerts = async (userId) => {
-    if (!userId) return;
-
-    try {
-      // 백엔드 API 호출 URL 수정 (3000 -> 8080)
-      const response = await axios.get(
-        `http://localhost:8080/api/posture/alerts?userId=${userId}`
-      );
-      const unacknowledgedAlerts = response.data.filter(
-        (alert) => !alert.acknowledged
-      );
-
-      setPostureAlerts(unacknowledgedAlerts);
-
-      // 가장 최근 알림을 현재 알림으로 설정
-      if (unacknowledgedAlerts.length > 0 && !currentAlert) {
-        setCurrentAlert(unacknowledgedAlerts[0]);
+    // 현재 알림 업데이트
+    setCurrentAlert((prev) => {
+      if (prev && prev.id === alertId) {
+        // 다음 알림이 있으면 표시
+        const nextAlert = postureAlerts.find((alert) => alert.id !== alertId);
+        return nextAlert || null;
       }
-    } catch (error) {
-      console.error("자세 알림을 가져오는 중 오류 발생:", error);
-    }
+      return prev;
+    });
+
+    console.log(`알림 ID ${alertId} 확인 처리 완료`);
   };
-
-  // 주기적으로 알림 데이터 가져오기
-  useEffect(() => {
-    if (!isConnected || !userId) return;
-
-    // 초기 알림 데이터 가져오기
-    fetchPostureAlerts(userId);
-
-    // 30초마다 알림 업데이트
-    const intervalId = setInterval(() => fetchPostureAlerts(userId), 30000);
-
-    return () => clearInterval(intervalId);
-  }, [isConnected, userId]);
 
   return (
     <WebSocketContext.Provider
@@ -643,7 +576,6 @@ export const WebSocketProvider = ({ children, userId }) => {
         startWebSocket,
         stopWebSocket,
         acknowledgeAlert,
-        fetchPostureAlerts,
       }}
     >
       {children}

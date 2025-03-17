@@ -19,8 +19,8 @@ const TitleStyle = styled.p`
 `;
 
 const VideoBoxStyle = styled.div`
-  width: 600px;
-  height: 401px;
+  width: 500px;
+  height: 381px;
   border-radius: 8px;
   border: 1px dashed #d4d4d4;
   display: flex;
@@ -326,7 +326,7 @@ const Analysis = () => {
         )}
       </VideoBoxStyle>
 
-      {start && <PostureFeedback userId={userId} />}
+      {start && <PostureFeedback />}
 
       {start && connectionError && (
         <ErrorMessage>{connectionError}</ErrorMessage>
