@@ -6,6 +6,7 @@ import CommonButton from "../../common/CommonButton";
 import { useNavigate } from "react-router-dom";
 import { userApi } from "../../api/userApi";
 import CommonDialog from "../../common/CommonDialog";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 
 const Root = styled(CommonRoot)`
   & input {
@@ -60,10 +61,30 @@ const MessageStyle = styled.p`
   font-weight: 800;
 `;
 
+const OrDivider = styled.div`
+  display: flex;
+  align-items: center;
+  width: 346px;
+  margin: 20px 0;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #dadce0;
+  }
+
+  span {
+    padding: 0 10px;
+    color: #757575;
+    font-size: ${(props) => props.theme.fontSize.xs};
+  }
+`;
+
 const Login = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // 상태로 username과 password 변수 선언
   const [username, setUsername] = useState("");
@@ -71,7 +92,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // 폼 기본 동작 방지
-    
+
     if (!username || !password) {
       setErrorMessage("아이디와 비밀번호를 모두 입력해주세요.");
       return;
@@ -106,7 +127,7 @@ const Login = () => {
   // 다이얼로그 닫기
   const handleCloseDialog = () => {
     setDialogOpen(false);
-    navigate("/main");   
+    navigate("/main");
   };
 
   const goToSignUp = () => {
@@ -135,6 +156,12 @@ const Login = () => {
           로그인
         </CommonButton>
       </Form>
+
+      <OrDivider>
+        <span>또는</span>
+      </OrDivider>
+
+      <GoogleLoginButton width="346px" />
 
       <TextStyle>
         회원이 아닌신가요? <span onClick={goToSignUp}>회원가입</span>
