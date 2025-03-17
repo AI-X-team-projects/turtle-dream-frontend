@@ -521,7 +521,7 @@ export const WebSocketProvider = ({ children, userId }) => {
   };
 
   useEffect(() => {
-    console.log("useEffect 실행, isActive:", isActive);
+    // console.log("useEffect 실행, isActive:", isActive);
 
     if (isActive) {
       // 약간의 지연 후 WebSocket 연결 시도

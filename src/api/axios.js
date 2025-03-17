@@ -12,7 +12,7 @@ const instance = axios.create({
 // 요청 인터셉터
 instance.interceptors.request.use(
   (config) => {
-    console.log("API 요청:", config);
+    // console.log("API 요청:", config);
     return config;
   },
   (error) => {
@@ -24,7 +24,7 @@ instance.interceptors.request.use(
 // 응답 인터셉터
 instance.interceptors.response.use(
   (response) => {
-    console.log("API 응답:", response);
+    // console.log("API 응답:", response);
     return response;
   },
   (error) => {
