@@ -7,6 +7,7 @@ import CommonButton from "../../common/CommonButton";
 import { useWebSocket } from "../../common/WebSocketProvider";
 import { useNavigate } from "react-router-dom";
 import eventBus from "../../utils/eventBus";
+import PostureFeedback from "../../components/PostureFeedback";
 
 const TitleStyle = styled.p`
   margin: 0;
@@ -28,7 +29,7 @@ const VideoBoxStyle = styled.div`
   margin-bottom: 14px;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: #000;
+  background-color: #f0f0f0;
   position: relative;
 `;
 
@@ -97,9 +98,10 @@ const BackText = styled.button`
   text-align: center;
 `;
 
-// 연결 상태 표시 컴포넌트
+// 연결 상태 표시 컴포넌트 (기존 코드는 주석 처리)
+/*
 const ConnectionStatus = styled.div`
-  margin-top: 10px;
+  margin-bottom: 15px;
   padding: 8px;
   border-radius: 4px;
   font-size: ${(props) => props.theme.fontSize.sm};
@@ -112,6 +114,7 @@ const ConnectionStatus = styled.div`
       : props.theme.color.grey};
   color: white;
 `;
+*/
 
 const ErrorMessage = styled.div`
   margin-top: 10px;
@@ -130,6 +133,8 @@ const Analysis = () => {
   const [cameras, setCameras] = useState([]);
   const [stream, setStream] = useState(null);
   const navigate = useNavigate();
+  // 사용자 ID 상태 추가 (실제 구현에서는 로그인 정보에서 가져오거나 props로 전달받아야 함)
+  const [userId, setUserId] = useState("current-user");
 
   const videoRef = useRef(null);
   const {
@@ -233,14 +238,14 @@ const Analysis = () => {
         const constraints = {
           video: selectedDevice
             ? {
-              deviceId: { exact: selectedDevice.deviceId },
-              width: { ideal: 500 },
-              height: { ideal: 281 },
-            }
+                deviceId: { exact: selectedDevice.deviceId },
+                width: { ideal: 500 },
+                height: { ideal: 281 },
+              }
             : {
-              width: { ideal: 500 },
-              height: { ideal: 281 },
-            },
+                width: { ideal: 500 },
+                height: { ideal: 281 },
+              },
           audio: false,
         };
 
@@ -321,18 +326,7 @@ const Analysis = () => {
         )}
       </VideoBoxStyle>
 
-      {start && (
-        <ConnectionStatus
-          $isConnected={isConnected}
-          $hasError={!!connectionError}
-        >
-          {isConnected
-            ? "서버에 연결됨"
-            : connectionError
-            ? "연결 오류"
-            : "서버에 연결 중..."}
-        </ConnectionStatus>
-      )}
+      {start && <PostureFeedback userId={userId} />}
 
       {start && connectionError && (
         <ErrorMessage>{connectionError}</ErrorMessage>
