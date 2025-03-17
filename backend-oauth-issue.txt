@@ -1,0 +1,57 @@
+안녕하세요, 백엔드 개발자님.
+
+구글 OAuth2 로그인 구현 중 다음과 같은 문제가 발생했습니다:
+
+1. 로그인 URL: `http://localhost:8080/oauth2/authorize/google?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect`
+
+2. 백엔드 로그:
+```
+2025-03-17 17:53:52.708 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing GET /oauth2/authorize/google?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
+2025-03-17 17:53:52.723 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured GET /oauth2/authorize/google?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
+2025-03-17 17:53:52.737 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-03-17 17:53:52.743 [http-nio-8080-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing GET /error?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
+```
+
+로그를 보면 `/oauth2/authorize/google` 엔드포인트에서 오류가 발생하여 `/error` 페이지로 리다이렉트되고 있습니다.
+
+문제 해결을 위한 제안:
+
+1. 백엔드의 OAuth2 설정에서 다음 사항을 확인해주세요:
+   - 구글 OAuth2 클라이언트 ID와 시크릿이 올바르게 설정되어 있는지
+   - 구글 개발자 콘솔에 등록된 리다이렉트 URI가 백엔드 설정과 일치하는지
+   - 백엔드에서 허용하는 리다이렉트 URI 목록에 `http://localhost:3000/oauth2/redirect`가 포함되어 있는지
+
+2. 프론트엔드에서는 다음과 같이 수정했습니다:
+   - `redirect_uri` 파라미터를 제거하고 백엔드에 설정된 기본 리다이렉트 URL을 사용하도록 변경
+   - 구글 로그인 버튼 클릭 시 단순히 `http://localhost:8080/oauth2/authorize/google`로 리다이렉트
+
+3. 백엔드에서 다음 설정을 확인해주세요:
+   - application.yml 또는 application.properties 파일에서 OAuth2 클라이언트 설정
+   ```yaml
+   spring:
+     security:
+       oauth2:
+         client:
+           registration:
+             google:
+               client-id: [구글 클라이언트 ID]
+               client-secret: [구글 클라이언트 시크릿]
+               redirect-uri: "{baseUrl}/login/oauth2/code/google"
+               scope: email, profile
+   ```
+
+4. 백엔드의 OAuth2 성공 핸들러에서 프론트엔드 주소로 리다이렉트하는 코드를 확인해주세요:
+   ```java
+   @Override
+   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+       // 사용자 정보 가져오기
+       OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+       
+       // 프론트엔드 메인 페이지로 리다이렉트
+       response.sendRedirect("http://localhost:3000/main");
+   }
+   ```
+
+문제가 해결되지 않으면 백엔드 로그의 전체 스택 트레이스를 공유해주시면 더 자세한 분석이 가능할 것 같습니다.
+
+감사합니다. 

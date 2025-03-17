@@ -4,28 +4,29 @@ import styled from "styled-components";
 import { postureApi } from "../../api/postureApi";
 
 const Root = styled.div`
-    width: 100%;
+  width: 100%;
 `;
 
 const ChartBox = styled.div`
-    width: 100%;
-    height: 60vh;
+  width: 100%;
+  height: 60vh;
 `;
 
 const TextBoxStyle = styled.div`
-    width: 100%;
-    padding: 20px;
-    background: ${(props) => props.theme.color.lightGreen};
-    border-radius: 8px;
-    box-shadow: 0 1px 4px 2px rgb(119 119 119 / 25%);
-    box-sizing: border-box;
+  width: 100%;
+  padding: 20px;
+  background: ${(props) => props.theme.color.lightGreen};
+  border-radius: 8px;
+  box-shadow: 0 1px 4px 2px rgb(119 119 119 / 25%);
+  box-sizing: border-box;
+  white-space: pre-line;
 `;
 
 const TitleStyle = styled.p`
-    margin: 0px;
-    font-size: ${(props) => props.theme.fontSize.md};
-    color: ${(props) => props.theme.color.green};
-    font-weight: 800;
+  margin: 0px;
+  font-size: ${(props) => props.theme.fontSize.md};
+  color: ${(props) => props.theme.color.green};
+  font-weight: 800;
 `;
 const TextStyleAdvice = styled.p`
     margin: 0px;
@@ -36,17 +37,17 @@ const TextStyleAdvice = styled.p`
 `;
 
 const LineStyle = styled.div`
-    width: 120px;
-    height: 2px;
-    background: ${(props) => props.theme.color.green};
-    margin-top: 5px;
+  width: 120px;
+  height: 2px;
+  background: ${(props) => props.theme.color.green};
+  margin-top: 5px;
 `;
 
 const TextStyle = styled.p`
-    margin: 0px;
-    font-size: ${(props) => props.theme.fontSize.base};
-    color: ${(props) => props.theme.color.black};
-    margin-top: 16px;
+  margin: 0px;
+  font-size: ${(props) => props.theme.fontSize.base};
+  color: ${(props) => props.theme.color.black};
+  margin-top: 16px;
 `;
 
 const Controls = styled.div`
@@ -102,8 +103,8 @@ const DayChart = () => {
     const [endHour, setEndHour] = useState(18); // 기본값: 18시
     const [advice, setAdvice] = useState("");
 
-    const userId = localStorage.getItem("username") || "defaultUser";
-    const today = new Date().toISOString().split("T")[0];
+  const userId = localStorage.getItem("username") || "defaultUser";
+  const today = new Date().toISOString().split("T")[0];
 
     useEffect(() => {
         const fetchDailyData = async () => {
@@ -184,8 +185,11 @@ const DayChart = () => {
     }, [userId, today, startHour, endHour]);
 
 
-    if (isLoading) return <div>로딩 중...</div>;
-    if (error) return <div>{error}</div>;
+        // 1시간 단위 그룹화 (09시~21시 모든 시간을 포함)
+        const groupedData = {};
+        for (let hour = 10; hour < 22; hour++) {
+          groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
+        }
 
     return (
         <Root>
