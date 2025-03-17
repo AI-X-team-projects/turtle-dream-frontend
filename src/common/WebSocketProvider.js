@@ -56,6 +56,7 @@ export const WebSocketProvider = ({ children, userId }) => {
   const ws = useRef(null); // WebSocket 인스턴스 참조
   const reconnectTimeout = useRef(null); // 재연결 타이머 참조
   const reconnectAttempts = useRef(0); // 재연결 시도 횟수
+  const MAX_RECONNECT_ATTEMPTS = 5;
 
   /**
    * WebSocket 연결 함수
@@ -66,60 +67,94 @@ export const WebSocketProvider = ({ children, userId }) => {
     if (!isActive) return;
 
     try {
-      // 기존 연결 정리
-      if (ws.current) {
-        console.log("기존 WebSocket 연결 종료");
-        ws.current.close();
-        ws.current = null;
-      }
-
-      // 재연결 타이머 정리
-      if (reconnectTimeout.current) {
-        console.log("재연결 타이머 정리");
-        clearTimeout(reconnectTimeout.current);
-        reconnectTimeout.current = null;
-      }
-
-      // 연결 시도 횟수 증가
-      reconnectAttempts.current += 1;
-
-      console.log(`WebSocket 연결 시도... (시도 ${reconnectAttempts.current})`);
-      setConnectionError(null);
-
-      // SockJS 인스턴스 생성 및 연결 (상대 경로 사용)
-      console.log("SockJS 인스턴스 생성 시작");
-      const sockjs = new SockJS("http://localhost:8080/ws/posture", null, {
-        transports: ["websocket", "xhr-streaming", "xhr-polling"],
-        debug: true,
-      });
-
-      console.log("SockJS 인스턴스 생성됨:", sockjs);
-      console.log("SockJS 상태:", sockjs.readyState);
-      console.log("SockJS URL:", sockjs.url);
-
-      ws.current = sockjs;
-
-      // 연결 성공 이벤트 핸들러
-      ws.current.onopen = () => {
-        console.log("WebSocket 연결 성공!");
-        console.log("WebSocket 상태:", ws.current.readyState);
-        console.log("WebSocket URL:", ws.current.url);
-        console.log("WebSocket 프로토콜:", ws.current.protocol);
-        setIsConnected(true);
-        reconnectAttempts.current = 0; // 연결 성공 시 시도 횟수 초기화
-
-        // 연결 후 사용자 ID 등록 메시지 전송
-        try {
-          const registerMessage = JSON.stringify({
-            type: "REGISTER",
-            userId: userId || localStorage.getItem("userId") || "anonymous",
-          });
-          ws.current.send(registerMessage);
-          console.log("사용자 등록 메시지 전송 완료");
-        } catch (error) {
-          console.error("사용자 등록 메시지 전송 중 오류:", error);
+        // 기존 연결 정리
+        if (ws.current) {
+            console.log("기존 WebSocket 연결 종료");
+            ws.current.close();
+            ws.current = null;
         }
-      };
+
+        // 재연결 타이머 정리
+        if (reconnectTimeout.current) {
+            console.log("재연결 타이머 정리");
+            clearTimeout(reconnectTimeout.current);
+            reconnectTimeout.current = null;
+        }
+
+        // 재연결 횟수 체크
+        if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
+            console.error("WebSocket 최대 재연결 시도 횟수 초과. 연결 중단.");
+            setConnectionError("연결 실패: 서버와 연결할 수 없습니다.");
+            return;
+        }
+
+        // 연결 시도 횟수 증가
+        reconnectAttempts.current += 1;
+
+        console.log(`WebSocket 연결 시도... (시도 ${reconnectAttempts.current})`);
+        setConnectionError(null);
+
+        // SockJS 인스턴스 생성 및 연결 (상대 경로 사용)
+        console.log("SockJS 인스턴스 생성 시작");
+        const sockjs = new SockJS("http://localhost:8080/ws/posture", null, {
+            transports: ["websocket", "xhr-streaming", "xhr-polling"],
+            debug: true,
+        });
+
+        console.log("SockJS 인스턴스 생성됨:", sockjs);
+        console.log("SockJS 상태:", sockjs.readyState);
+        console.log("SockJS URL:", sockjs.url);
+
+        ws.current = sockjs;
+
+        // 연결 성공 이벤트 핸들러
+        ws.current.onopen = () => {
+            console.log("WebSocket 연결 성공!");
+            console.log("WebSocket 상태:", ws.current.readyState);
+            console.log("WebSocket URL:", ws.current.url);
+            console.log("WebSocket 프로토콜:", ws.current.protocol);
+
+            setIsConnected(true);
+            reconnectAttempts.current = 0; // 연결 성공 시 시도 횟수 초기화
+
+            // WebSocket이 정상적으로 열린 경우만 사용자 등록 메시지 전송
+            if (ws.current.readyState === WebSocket.OPEN) {
+                try {
+                    const registerMessage = JSON.stringify({
+                        type: "REGISTER",
+                        userId: userId || localStorage.getItem("username") || "anonymous",
+                    });
+                    ws.current.send(registerMessage);
+                    console.log("사용자 등록 메시지 전송 완료");
+                } catch (error) {
+                    console.error("사용자 등록 메시지 전송 중 오류:", error);
+                }
+            }
+        };
+
+        // 메시지 수신 핸들러
+        ws.current.onmessage = (event) => {
+            console.log("WebSocket 메시지 수신:", event.data);
+        };
+
+        // WebSocket 오류 처리
+        ws.current.onerror = (error) => {
+            console.error("WebSocket 오류 발생:", error);
+        };
+
+        // WebSocket 닫힐 때 (비정상 종료 포함) → 자동 재연결
+        ws.current.onclose = () => {
+            console.warn("WebSocket 연결 종료됨.");
+
+            ws.current = null; // WebSocket 객체 정리
+
+            if (isActive) {
+                console.log("🔄 WebSocket 재연결 시도...");
+                reconnectTimeout.current = setTimeout(() => {
+                    connectWebSocket();
+                }, 3000); // 3초 후 재연결
+            }
+        };
 
       // 메시지 수신 이벤트 핸들러
       ws.current.onmessage = (event) => {
@@ -226,12 +261,12 @@ export const WebSocketProvider = ({ children, userId }) => {
    */
   const sendImageToWebSocket = (imageFile) => {
     if (!imageFile) {
-        console.error("❌ 에러: 이미지 파일이 존재하지 않습니다.");
+        console.error("에러: 이미지 파일이 존재하지 않습니다.");
         return;
     }
 
     if (!(imageFile instanceof Blob)) {
-        console.error("❌ 에러: imageFile이 Blob 타입이 아님", imageFile);
+        console.error("에러: imageFile이 Blob 타입이 아님", imageFile);
         return;
     }
 
@@ -239,13 +274,13 @@ export const WebSocketProvider = ({ children, userId }) => {
 
     reader.onload = () => {
         const base64Image = reader.result; // 'data:image/png;base64,...' 형식으로 변환됨
-        console.log("📷 Base64 변환 성공:", base64Image.substring(0, 100)); // 디버깅용
+        console.log("Base64 변환 성공:", base64Image.substring(0, 100)); // 디버깅용
 
         sendImageData(base64Image);
     };
 
     reader.onerror = (error) => {
-        console.error("❌ FileReader 에러 발생:", error);
+        console.error("FileReader 에러 발생:", error);
     };
 
     reader.readAsDataURL(imageFile);
@@ -253,21 +288,22 @@ export const WebSocketProvider = ({ children, userId }) => {
 
     // 🔹 WebSocket을 통해 이미지 데이터 전송
     const sendImageData = (imageData) => {
+
       if (!ws.current) {
-          console.error("❌ WebSocket 인스턴스가 없습니다.");
+          console.error("WebSocket 인스턴스가 없습니다.");
           return;
       }
 
       if (typeof imageData !== "string") {
-          console.error("❌ 에러: imageData가 Base64 문자열이 아님", imageData);
+          console.error("에러: imageData가 Base64 문자열이 아님", imageData);
           return;
       }
 
-      console.log("📤 WebSocket 전송 Base64 데이터 길이:", imageData.length);
-      console.log("📤 WebSocket 전송 Base64 데이터 앞 100자:", imageData.substring(0, 100));
+      console.log("WebSocket 전송 Base64 데이터 길이:", imageData.length);
+      console.log("WebSocket 전송 Base64 데이터 앞 100자:", imageData.substring(0, 100));
 
       if (ws.current.readyState !== WebSocket.OPEN) {
-          console.error("❌ WebSocket 연결 상태 문제:", {
+          console.error("WebSocket 연결 상태 문제:", {
               readyState: ws.current.readyState,
               isConnected: isConnected,
           });
@@ -281,12 +317,12 @@ export const WebSocketProvider = ({ children, userId }) => {
               image: imageData,  // MIME 타입 포함된 Base64 데이터
           });
 
-          console.log("📤 WebSocket 최종 전송 데이터:", message);
+          console.log("WebSocket 최종 전송 데이터:", message);
 
           ws.current.send(message);
-          console.log("✅ 이미지 데이터 전송 완료, userId:", userId);
+          console.log("이미지 데이터 전송 완료, userId:", userId);
       } catch (error) {
-          console.error("❌ 이미지 전송 중 오류:", error);
+          console.error("이미지 전송 중 오류:", error);
           ws.current.close();
       }
   };
@@ -317,28 +353,50 @@ export const WebSocketProvider = ({ children, userId }) => {
   };
 
   // useEffect 훅 수정
+  // useEffect(() => {
+  //   console.log("useEffect 실행, isActive:", isActive);
+
+  //   if (isActive) {
+  //     // 약간의 지연 후 연결 시도 (React 렌더링 완료 후)
+  //     const timer = setTimeout(() => {
+  //       connectWebSocket();
+  //     }, 100);
+
+  //     return () => {
+  //       clearTimeout(timer);
+  //     };
+  //   }
+
+  //   return () => {
+  //     if (ws.current) {
+  //       console.log("컴포넌트 언마운트 시 WebSocket 연결 종료");
+  //       ws.current.close();
+  //       ws.current = null;
+  //     }
+  //   };
+  // }, [isActive]);
   useEffect(() => {
     console.log("useEffect 실행, isActive:", isActive);
 
     if (isActive) {
-      // 약간의 지연 후 연결 시도 (React 렌더링 완료 후)
-      const timer = setTimeout(() => {
-        connectWebSocket();
-      }, 100);
+        // 약간의 지연 후 WebSocket 연결 시도
+        const timer = setTimeout(() => {
+            connectWebSocket();
+        }, 100);
 
-      return () => {
-        clearTimeout(timer);
-      };
+        return () => {
+            clearTimeout(timer);
+            if (ws.current) {
+                console.log("WebSocket 종료 중...");
+                ws.current.onclose = null;  // 이벤트 핸들러 제거
+                ws.current.close();
+                ws.current = null;  // 안전하게 null 처리
+            }
+        };
     }
+}, [isActive]);
 
-    return () => {
-      if (ws.current) {
-        console.log("컴포넌트 언마운트 시 WebSocket 연결 종료");
-        ws.current.close();
-        ws.current = null;
-      }
-    };
-  }, [isActive]);
+
 
   return (
     <WebSocketContext.Provider

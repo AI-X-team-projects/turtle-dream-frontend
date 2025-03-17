@@ -101,7 +101,7 @@ const DayChart = () => {
                 setError(null);
             } catch (err) {
                 setError("데이터를 불러오는데 실패했습니다.");
-                console.error("❌ API 오류:", err);
+                console.error("API 오류:", err);
             } finally {
                 setIsLoading(false);
             }
@@ -123,7 +123,7 @@ const DayChart = () => {
                     yScale={{
                         type: "linear",
                         min: 0,
-                        max: 100,
+                        max: 200,
                         stacked: false,
                         reverse: false,
                     }}

@@ -51,7 +51,7 @@ function Layout({ children }) {
 
 function App() {
   // const [userId, setUserId] = useState("defaultUser"); // 실제로는 로그인 시 설정되어야 함
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || "defaultUser"); 
+  const [userId, setUserId] = useState(localStorage.getItem("username") || "defaultUser"); 
 
   return (
     <ThemeProvider theme={theme}>
