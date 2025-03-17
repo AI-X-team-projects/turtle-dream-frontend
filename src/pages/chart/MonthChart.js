@@ -59,6 +59,14 @@ const TextStyle = styled.p`
     margin-top: 16px;
 `;
 
+const TextStyleAdvice = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.base};
+    color: ${(props) => props.theme.color.black};
+    margin-top: 16px;
+    white-space: pre-line;
+`;
+
 const Message = styled.p`
     font-size: ${(props) => props.theme.fontSize.base};
     color: ${(props) => props.theme.color.black};
@@ -74,6 +82,7 @@ const MonthChart = () => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [advice, setAdvice] = useState("");
 
     const userId = localStorage.getItem("username");
 
@@ -113,7 +122,20 @@ const MonthChart = () => {
                 setIsLoading(false);
             }
         };
-
+        const fetchAdvice = async() => {
+            try{
+                const startDate = range[0].startDate.toLocaleDateString("sv-SE"); // YYYY-MM-DD 형식 유지
+                const endDate = range[0].endDate.toLocaleDateString("sv-SE");
+                
+                const result_advice = await postureApi.getAiMonthlyAdvice(userId,startDate,endDate);
+                setAdvice(result_advice); 
+                }
+            catch(error){
+                console.error("Model을 가져오는데 실패했습니다.",error);
+            }
+        }
+        fetchAdvice();
+        setIsLoading(false);   
         fetchMonthlyData();
     }, [userId, range]);
 
@@ -195,9 +217,9 @@ const MonthChart = () => {
             <TextBoxStyle>
                 <TitleStyle>월별 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>
-                    선택한 날짜 범위에서 좋은 자세와 나쁜 자세의 발생 횟수를 비교해보세요.
-                </TextStyle>
+                <TextStyleAdvice>
+                    {advice !== null ? advice : "Loading..."}
+                </TextStyleAdvice>
             </TextBoxStyle>
         </Root>
     );
