@@ -91,9 +91,22 @@ export const postureApi = {
     //         throw error;
     //     }
     // },
-    getAiAdvice: async (userId) => {
+
+    //일별 피드백백
+    getAiDailyAdvice: async (userId) => {
         try {
             const response = await axios.get(`/api/posture/feedback/daily/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    //월간 피드백
+    getAiMonthlyAdvice: async (userId,startDate,endDate) => {
+        try {
+            const response = await axios.get(`/api/posture/feedback/monthly/${userId}`,{
+                params: { startDate, endDate } 
+            });
             return response.data;
         } catch (error) {
             throw error;

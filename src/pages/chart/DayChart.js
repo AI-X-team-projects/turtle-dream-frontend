@@ -27,6 +27,13 @@ const TitleStyle = styled.p`
     color: ${(props) => props.theme.color.green};
     font-weight: 800;
 `;
+const TextStyleAdvice = styled.p`
+    margin: 0px;
+    font-size: ${(props) => props.theme.fontSize.base};
+    color: ${(props) => props.theme.color.black};
+    margin-top: 16px;
+    white-space: pre-line;
+`;
 
 const LineStyle = styled.div`
     width: 120px;
@@ -133,7 +140,7 @@ const DayChart = () => {
 
         const fetchAdvice = async() => {
                     try{
-                        const result_advice = await postureApi.getAiAdvice(userId);
+                        const result_advice = await postureApi.getAiDailyAdvice(userId);
                         setAdvice(result_advice); 
                     }
                     catch(error){
@@ -232,7 +239,7 @@ const DayChart = () => {
             <TextBoxStyle>
                 <TitleStyle>나쁜 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>{advice !== null ? advice : "Loading..."}</TextStyle>
+                <TextStyleAdvice>{advice !== null ? advice : "Loading..."}</TextStyleAdvice>
             </TextBoxStyle>
         </Root>
     );
