@@ -47,6 +47,7 @@ const DayChart = () => {
     const [maxYValue, setMaxYValue] = useState(200); // 기본값 200
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [advice, setAdvice] = useState("");
 
     const userId = localStorage.getItem("username") || "defaultUser";
     const today = new Date().toISOString().split("T")[0];
@@ -111,7 +112,17 @@ const DayChart = () => {
                 setIsLoading(false);
             }
         };
-
+        const fetchAdvice = async() => {
+                    try{
+                        const result_advice = await postureApi.getAiAdvice(userId);
+                        setAdvice(result_advice); 
+                    }
+                    catch(error){
+                        console.error("Model을 가져오는데 실패했습니다.",error);
+                    }
+        }
+        fetchAdvice();
+        setIsLoading(false);   
         fetchDailyData();
     }, [userId, today]);
 
@@ -178,7 +189,7 @@ const DayChart = () => {
             <TextBoxStyle>
                 <TitleStyle>나쁜 자세 분석</TitleStyle>
                 <LineStyle />
-                <TextStyle>1시간 간격으로 나쁜 자세 지속 시간을 확인하세요.</TextStyle>
+                <TextStyle>{advice !== null ? advice : "Loading..."}</TextStyle>
             </TextBoxStyle>
         </Root>
     );
