@@ -29,18 +29,11 @@ const TitleStyle = styled.p`
   font-weight: 800;
 `;
 const TextStyleAdvice = styled.p`
-    margin: 0px;
-    font-size: ${(props) => props.theme.fontSize.base};
-    color: ${(props) => props.theme.color.black};
-    margin-top: 16px;
-    white-space: pre-line;
-`;
-const TextStyleAdvice = styled.p`
-    margin: 0px;
-    font-size: ${(props) => props.theme.fontSize.base};
-    color: ${(props) => props.theme.color.black};
-    margin-top: 16px;
-    white-space: pre-line;
+  margin: 0px;
+  font-size: ${(props) => props.theme.fontSize.base};
+  color: ${(props) => props.theme.color.black};
+  margin-top: 16px;
+  white-space: pre-line;
 `;
 
 const LineStyle = styled.div`
@@ -58,278 +51,246 @@ const TextStyle = styled.p`
 `;
 
 const Controls = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 16px;
-    margin-left: 30px;
-    & label {
-        font-size: ${(props) => props.theme.fontSize.base};
-        color: ${(props) => props.theme.color.black};
-        font-weight: 600;
-    }
-    & p {
-        margin: 0px;
-    }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  margin-left: 30px;
+  & label {
+    font-size: ${(props) => props.theme.fontSize.base};
+    color: ${(props) => props.theme.color.black};
+    font-weight: 600;
+  }
+  & p {
+    margin: 0px;
+  }
 `;
 
 const Select = styled.select`
-    padding: 5px 10px 5px 5px;
-    font-size: ${(props) => props.theme.fontSize.base};
-    background-color: #fff;
+  padding: 5px 10px 5px 5px;
+  font-size: ${(props) => props.theme.fontSize.base};
+  background-color: #fff;
+  color: ${(props) => props.theme.color.black};
+  border: 1px solid ${(props) => props.theme.color.grey};
+  border-radius: 8px;
+  margin-left: 12px;
+  &:focus {
+    outline: none;
+  }
+  & option {
+    font-size: ${(props) => props.theme.fontSize.sm};
     color: ${(props) => props.theme.color.black};
-    border: 1px solid ${(props) => props.theme.color.grey};
+  }
+  /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: ${(props) => props.theme.color.grey};
     border-radius: 8px;
-    margin-left: 12px;
-    &:focus {
-        outline: none;
-    }
-    & option {
-        font-size: ${(props) => props.theme.fontSize.sm};
-        color: ${(props) => props.theme.color.black};
-    }
-    /* 스크롤바 스타일 */
-    &::-webkit-scrollbar {
-        width: 8px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color:${(props) => props.theme.color.grey};
-        border-radius: 8px;
-    }
-    &::-webkit-scrollbar-track {
-        background-color: #f0f0f0;
-    }
-`;
-
-const Controls = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 16px;
-    margin-left: 30px;
-    & label {
-        font-size: ${(props) => props.theme.fontSize.base};
-        color: ${(props) => props.theme.color.black};
-        font-weight: 600;
-    }
-    & p {
-        margin: 0px;
-    }
-`;
-
-const Select = styled.select`
-    padding: 5px 10px 5px 5px;
-    font-size: ${(props) => props.theme.fontSize.base};
-    background-color: #fff;
-    color: ${(props) => props.theme.color.black};
-    border: 1px solid ${(props) => props.theme.color.grey};
-    border-radius: 8px;
-    margin-left: 12px;
-    &:focus {
-        outline: none;
-    }
-    & option {
-        font-size: ${(props) => props.theme.fontSize.sm};
-        color: ${(props) => props.theme.color.black};
-    }
-    /* 스크롤바 스타일 */
-    &::-webkit-scrollbar {
-        width: 8px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color:${(props) => props.theme.color.grey};
-        border-radius: 8px;
-    }
-    &::-webkit-scrollbar-track {
-        background-color: #f0f0f0;
-    }
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+  }
 `;
 
 const DayChart = () => {
-    const [chartData, setChartData] = useState([]);
-    const [maxYValue, setMaxYValue] = useState(200); // 기본값 200
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [startHour, setStartHour] = useState(9); // 기본값: 9시
-    const [endHour, setEndHour] = useState(18); // 기본값: 18시
-    const [advice, setAdvice] = useState("");
+  const [chartData, setChartData] = useState([]);
+  const [maxYValue, setMaxYValue] = useState(200); // 기본값 200
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [startHour, setStartHour] = useState(9); // 기본값: 9시
+  const [endHour, setEndHour] = useState(18); // 기본값: 18시
+  const [advice, setAdvice] = useState("");
 
   const userId = localStorage.getItem("username") || "defaultUser";
   const today = new Date().toISOString().split("T")[0];
 
-    useEffect(() => {
-        const fetchDailyData = async () => {
-            try {
-                setIsLoading(true);
-                const response = await postureApi.getDailyPosture(userId, today);
+  useEffect(() => {
+    const fetchDailyData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await postureApi.getDailyPosture(userId, today);
 
-                if (!response || !Array.isArray(response)) {
-                    console.error("서버 응답이 올바르지 않습니다.", response);
-                    setChartData([]); // 오류 발생 방지
-                    return;
-                }
-
-                // 사용자가 설정한 시작 시간과 종료 시간 반영
-                const groupedData = {};
-                for (let hour = startHour; hour <= endHour; hour++) {
-                    groupedData[`${hour}시`] = 0;
-                }
-
-                response.forEach((item) => {
-                    if (!item.recordedAt) return;
-
-                    const hour = parseInt(item.recordedAt.split("T")[1]?.substring(0, 2), 10);
-                    if (hour >= startHour && hour <= endHour) {
-                        const hourLabel = `${hour}시`;
-                        if (!groupedData[hourLabel]) {
-                            groupedData[hourLabel] = 0;
-                        }
-                        groupedData[hourLabel] += item.badPostureDuration || 0;
-                    }
-                });
-
-                const transformedData = [
-                    {
-                        id: "나쁜 자세 횟수",
-                        color: "#3B604B",
-                        data: Object.keys(groupedData)
-                            .map((hour) => ({
-                                x: hour,
-                                y: groupedData[hour],
-                            }))
-                            .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
-                    },
-                ];
-
-                // 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
-                if (!transformedData[0]?.data.length) {
-                    console.warn("변환된 데이터가 비어 있음", transformedData);
-                    setChartData([]);
-                    return;
-                }
-
-                const maxDataValue = Math.max(...transformedData[0].data.map((d) => d.y), 200);
-                setMaxYValue(maxDataValue + 100);
-
-                setChartData(transformedData);
-                setError(null);
-            } catch (err) {
-                setError("데이터를 불러오는데 실패했습니다.");
-                console.error("API 오류:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const fetchAdvice = async () => {
-            try {
-                const result_advice = await postureApi.getAiDailyAdvice(userId);
-                setAdvice(result_advice);
-            }
-            catch (error) {
-                console.error("Model을 가져오는데 실패했습니다.", error);
-            }
+        if (!response || !Array.isArray(response)) {
+          console.error("서버 응답이 올바르지 않습니다.", response);
+          setChartData([]); // 오류 발생 방지
+          return;
         }
-        fetchAdvice();
-        setIsLoading(false);
-        fetchDailyData();
-    }, [userId, today, startHour, endHour]);
 
-
-        // 1시간 단위 그룹화 (09시~21시 모든 시간을 포함)
+        // 사용자가 설정한 시작 시간과 종료 시간 반영
         const groupedData = {};
-        for (let hour = 10; hour < 22; hour++) {
-          groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
+        for (let hour = startHour; hour <= endHour; hour++) {
+          groupedData[`${hour}시`] = 0;
         }
 
-    return (
-        <Root>
-            <Controls>
-                <label>
-                    시작 시간:
-                    <Select value={startHour} onChange={(e) => setStartHour(parseInt(e.target.value))}>
-                        {Array.from({ length: 24 }, (_, i) => (
-                            <option key={i} value={i}>
-                                {i}시
-                            </option>
-                        ))}
-                    </Select>
-                </label>
-                <p> ~ </p>
-                <label>
-                    종료 시간:
-                    <Select value={endHour} onChange={(e) => setEndHour(parseInt(e.target.value))}>
-                        {Array.from({ length: 24 }, (_, i) => (
-                            <option key={i} value={i}>
-                                {i}시
-                            </option>
-                        ))}
-                    </Select>
-                </label>
-            </Controls>
+        response.forEach((item) => {
+          if (!item.recordedAt) return;
 
-            <ChartBox>
-                <ResponsiveLine
-                    data={chartData}
-                    margin={{ top: 30, right: 100, bottom: 50, left: 60 }}
-                    xScale={{ type: "point" }}
-                    yScale={{
-                        type: "linear",
-                        min: 0,
-                        max: maxYValue,
-                        stacked: false,
-                        reverse: false,
-                    }}
-                    curve="monotoneX"
-                    axisTop={null}
-                    axisRight={null}
-                    axisBottom={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        tickRotation: -45,
-                        legendOffset: 50,
-                        legendPosition: "middle",
-                    }}
-                    axisLeft={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        legendOffset: -46,
-                        legendPosition: "middle",
-                    }}
-                    enableGridX={true}
-                    enableGridY={true}
-                    pointSize={4}
-                    pointColor="#3B604B"
-                    pointBorderWidth={2}
-                    pointBorderColor="#3B604B"
-                    pointLabelYOffset={-12}
-                    enableArea={true}
-                    areaBaselineValue={0}
-                    areaOpacity={0.15}
-                    useMesh={true}
-                    colors={["#3B604B"]}
-                    tooltip={({ point }) => (
-                        <div
-                            style={{
-                                background: "white",
-                                padding: "9px 12px",
-                                border: "1px solid #ccc",
-                                borderRadius: "4px",
-                            }}
-                        >
-                            <strong>{point.data.x}</strong>
-                            <div>나쁜 자세: {point.data.y}회</div>
-                        </div>
-                    )}
-                />
-            </ChartBox>
-            <TextBoxStyle>
-                <TitleStyle>나쁜 자세 분석</TitleStyle>
-                <LineStyle />
-                <TextStyleAdvice>{advice !== null ? advice : "Loading..."}</TextStyleAdvice>
-            </TextBoxStyle>
-        </Root>
-    );
+          const hour = parseInt(
+            item.recordedAt.split("T")[1]?.substring(0, 2),
+            10
+          );
+          if (hour >= startHour && hour <= endHour) {
+            const hourLabel = `${hour}시`;
+            if (!groupedData[hourLabel]) {
+              groupedData[hourLabel] = 0;
+            }
+            groupedData[hourLabel] += item.badPostureDuration || 0;
+          }
+        });
+
+        const transformedData = [
+          {
+            id: "나쁜 자세 횟수",
+            color: "#3B604B",
+            data: Object.keys(groupedData)
+              .map((hour) => ({
+                x: hour,
+                y: groupedData[hour],
+              }))
+              .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
+          },
+        ];
+
+        // 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
+        if (!transformedData[0]?.data.length) {
+          console.warn("변환된 데이터가 비어 있음", transformedData);
+          setChartData([]);
+          return;
+        }
+
+        const maxDataValue = Math.max(
+          ...transformedData[0].data.map((d) => d.y),
+          200
+        );
+        setMaxYValue(maxDataValue + 100);
+
+        setChartData(transformedData);
+        setError(null);
+      } catch (err) {
+        setError("데이터를 불러오는데 실패했습니다.");
+        console.error("API 오류:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchAdvice = async () => {
+      try {
+        const result_advice = await postureApi.getAiDailyAdvice(userId);
+        setAdvice(result_advice);
+      } catch (error) {
+        console.error("Model을 가져오는데 실패했습니다.", error);
+      }
+    };
+    fetchAdvice();
+    setIsLoading(false);
+    fetchDailyData();
+  }, [userId, today, startHour, endHour]);
+
+  // 1시간 단위 그룹화 (09시~21시 모든 시간을 포함)
+  const groupedData = {};
+  for (let hour = 10; hour < 22; hour++) {
+    groupedData[`${hour}시`] = 0; // 기본값 0으로 초기화
+  }
+
+  return (
+    <Root>
+      <Controls>
+        <label>
+          시작 시간:
+          <Select
+            value={startHour}
+            onChange={(e) => setStartHour(parseInt(e.target.value))}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>
+                {i}시
+              </option>
+            ))}
+          </Select>
+        </label>
+        <p> ~ </p>
+        <label>
+          종료 시간:
+          <Select
+            value={endHour}
+            onChange={(e) => setEndHour(parseInt(e.target.value))}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>
+                {i}시
+              </option>
+            ))}
+          </Select>
+        </label>
+      </Controls>
+
+      <ChartBox>
+        <ResponsiveLine
+          data={chartData}
+          margin={{ top: 30, right: 100, bottom: 50, left: 60 }}
+          xScale={{ type: "point" }}
+          yScale={{
+            type: "linear",
+            min: 0,
+            max: maxYValue,
+            stacked: false,
+            reverse: false,
+          }}
+          curve="monotoneX"
+          axisTop={null}
+          axisRight={null}
+          axisBottom={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: -45,
+            legendOffset: 50,
+            legendPosition: "middle",
+          }}
+          axisLeft={{
+            tickSize: 5,
+            tickPadding: 5,
+            legendOffset: -46,
+            legendPosition: "middle",
+          }}
+          enableGridX={true}
+          enableGridY={true}
+          pointSize={4}
+          pointColor="#3B604B"
+          pointBorderWidth={2}
+          pointBorderColor="#3B604B"
+          pointLabelYOffset={-12}
+          enableArea={true}
+          areaBaselineValue={0}
+          areaOpacity={0.15}
+          useMesh={true}
+          colors={["#3B604B"]}
+          tooltip={({ point }) => (
+            <div
+              style={{
+                background: "white",
+                padding: "9px 12px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              <strong>{point.data.x}</strong>
+              <div>나쁜 자세: {point.data.y}회</div>
+            </div>
+          )}
+        />
+      </ChartBox>
+      <TextBoxStyle>
+        <TitleStyle>나쁜 자세 분석</TitleStyle>
+        <LineStyle />
+        <TextStyleAdvice>
+          {advice !== null ? advice : "Loading..."}
+        </TextStyleAdvice>
+      </TextBoxStyle>
+    </Root>
+  );
 };
 
 export default DayChart;
