@@ -77,7 +77,6 @@ const PostureFeedback = () => {
             body: `${Math.floor(badPostureDuration / 60)}분 ${
               badPostureDuration % 60
             }초 동안 나쁜 자세를 유지하고 있습니다. 바른 자세로 돌아가세요.`,
-            icon: "/warning-icon.png",
           });
 
           // console.log("알림 전송 완료");
