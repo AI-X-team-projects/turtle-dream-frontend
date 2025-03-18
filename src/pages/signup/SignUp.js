@@ -12,10 +12,10 @@ const Root = styled(CommonRoot)`
   justify-content: flex-start;
   padding-top: 30px;
   box-sizing: border-box;
-  & div > input {
+  & > div > input {
     margin-bottom: 10px;
   }
-  & div > button {
+  & > div > button {
     margin-top: 14px;
   }
 `;
