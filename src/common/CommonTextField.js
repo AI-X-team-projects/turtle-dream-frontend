@@ -2,10 +2,10 @@ import React from "react";
 import styled from 'styled-components';
 
 const InputStyle = styled.input`
-  width: ${(props) => (props.width ||  '100%')};
-  height: ${(props) => (props.height ||  '50px')};
+  width: ${(props) => (props.width || '100%')};
+  height: ${(props) => (props.height || '50px')};
   background-color: #fff;
-  border: 1px solid #DADADA;
+  border: 1px solid ${(props) => props.theme.color.grey};
   border-radius: 8px;
   padding: 0 10px;
   box-sizing: border-box;
@@ -21,23 +21,23 @@ const InputStyle = styled.input`
 `;
 
 const CommonTextField = ({
-    type = "text",
-    width,
-    placeholder,
-    value,
-    onChange,
-    disabled,
-    name
+  type = "text",
+  width,
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  name
 }) => {
   return (
-    <InputStyle 
-        type={type}
-        width={width}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        name={name}
+    <InputStyle
+      type={type}
+      width={width}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      name={name}
     />
   );
 };

@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import styled from "styled-components";
 import Login from "./pages/login/Login";
@@ -11,6 +16,8 @@ import Main from "./pages/main/Main";
 import Analysis from "./pages/analyze/Analysis";
 import { WebSocketProvider } from "./common/WebSocketProvider";
 import { userApi } from "./api/userApi";
+import NotFound from "./pages/NotFound";
+import OAuth2RedirectHandler from "./pages/login/OAuth2RedirectHandler";
 
 const Root = styled.div`
   width: 100%;
@@ -24,18 +31,16 @@ const Root = styled.div`
   }
 `;
 
-const ContentsBox = styled.div`
-  
-`;
+const ContentsBox = styled.div``;
 
 // 보호된 라우트 컴포넌트
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = userApi.checkLoginStatus();
-  
+
   if (!isLoggedIn) {
     return <Navigate to="/" replace />;
   }
-  
+
   return children;
 };
 
@@ -50,7 +55,9 @@ function Layout({ children }) {
 
 function App() {
   // const [userId, setUserId] = useState("defaultUser"); // 실제로는 로그인 시 설정되어야 함
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || "defaultUser"); 
+  const [userId, setUserId] = useState(
+    localStorage.getItem("username") || "defaultUser"
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -60,6 +67,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Login setUserId={setUserId} />} />
               <Route path="/signup" element={<SingUp />} />
+              <Route
+                path="/oauth2/redirect"
+                element={<OAuth2RedirectHandler />}
+              />
               <Route
                 path="/main"
                 element={
@@ -84,6 +95,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
         </Router>
