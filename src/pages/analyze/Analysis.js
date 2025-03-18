@@ -9,6 +9,12 @@ import { useNavigate } from "react-router-dom";
 import eventBus from "../../utils/eventBus";
 import PostureFeedback from "../../components/PostureFeedback";
 
+const Root = styled(CommonRoot)`
+  justify-content: flex-start;
+  padding-top: 30px;
+  box-sizing: border-box;
+`;
+
 const TitleStyle = styled.p`
   margin: 0;
   font-size: ${(props) => props.theme.fontSize.lg};
@@ -87,8 +93,16 @@ const Video = styled.video`
   transform: scaleX(-1);
 `;
 
+const BackBox = styled.div`
+  width: 100%;
+  padding-bottom: 80px;
+  & svg {
+    transform: rotate(90deg);
+  }
+`;
+
 const BackText = styled.button`
-  margin: 8px 0 0;
+  margin: 30px 0 0;
   font-size: ${(props) => props.theme.fontSize.sm};
   color: ${(props) => props.theme.color.black};
   font-weight: 800;
@@ -316,7 +330,11 @@ const Analysis = () => {
   };
 
   return (
-    <CommonRoot>
+    <Root>
+      <BackBox>
+        <BackText onClick={goToMain}><ArrowIcon /> 메인으로 이동</BackText>
+      </BackBox>
+      
       <TitleStyle>자세 측정</TitleStyle>
       <VideoBoxStyle>
         {start ? (
@@ -356,8 +374,7 @@ const Analysis = () => {
         children={start ? "측정 중지" : "측정 시작"}
         onClick={handleClickButton}
       />
-      <BackText onClick={goToMain}>메인으로 이동</BackText>
-    </CommonRoot>
+    </Root>
   );
 };
 

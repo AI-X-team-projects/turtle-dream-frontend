@@ -9,10 +9,13 @@ import CommonDialog from "../../common/CommonDialog";
 import { ReactComponent as ArrowIcon } from "../../assets/images/ArrowIcon.svg";
 
 const Root = styled(CommonRoot)`
-  & > input {
+  justify-content: flex-start;
+  padding-top: 30px;
+  box-sizing: border-box;
+  & div > input {
     margin-bottom: 10px;
   }
-  & > button {
+  & div > button {
     margin-top: 14px;
   }
 `;
@@ -23,6 +26,7 @@ const BackBox = styled.div`
     transform: rotate(90deg);
   }
 `;
+
 const BackText = styled.button`
   margin: 8px 0 0;
   font-size: ${(props) => props.theme.fontSize.sm};
@@ -40,6 +44,12 @@ const TitleStyle = styled.p`
   font-weight: 800;
   text-align: center;
   margin-bottom: 30px;
+`;
+
+const RootIn = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px;
 `;
 
 const Box = styled.div`
@@ -261,99 +271,102 @@ const SignUp = () => {
     <Root>
       <BackBox>
         <BackText onClick={goToHome}>
-          <ArrowIcon /> 홈으로 이동
+          <ArrowIcon /> 뒤로가기
         </BackText>
       </BackBox>
-      <TitleStyle>회원가입</TitleStyle>
-      <Box>
+
+      <RootIn>
+        <TitleStyle>회원가입</TitleStyle>
+        <Box>
+          <CommonTextField
+            placeholder={"아이디"}
+            width={"245px"}
+            value={username}
+            onChange={handleUsernameChange}
+            error={errors.username}
+          />
+          <CommonButton
+            width={"90px"}
+            height={"50px"}
+            fontSize={"16px"}
+            onClick={handleCheckUserName}
+            disabled={!username || isLoading}
+          >
+            중복 확인
+          </CommonButton>
+        </Box>
+
         <CommonTextField
-          placeholder={"아이디"}
-          width={"245px"}
-          value={username}
-          onChange={handleUsernameChange}
-          error={errors.username}
+          type={"password"}
+          placeholder={"비밀번호"}
+          width={"346px"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={errors.password}
         />
+        <CommonTextField
+          type={"password"}
+          placeholder={"비밀번호 확인"}
+          width={"346px"}
+          value={passwordCheck}
+          onChange={(e) => setPasswordCheck(e.target.value)}
+          error={errors.passwordCheck}
+        />
+
+        <Box>
+          <CommonTextField
+            placeholder={"이름"}
+            width={"228px"}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            error={errors.name}
+          />
+          <CommonButton
+            outline={gender === "남" ? false : true}
+            onClick={() => setGender("남")} // 성별 남 선택
+            {...ButtonProps}
+          >
+            남
+          </CommonButton>
+          <CommonButton
+            outline={gender === "여" ? false : true}
+            onClick={() => setGender("여")}
+            {...ButtonProps}
+          >
+            여
+          </CommonButton>
+        </Box>
+
+        <Box>
+          <CommonTextField
+            placeholder={"나이"}
+            width={"168px"}
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+            type="number"
+            error={errors.age}
+          />
+          <CommonTextField
+            placeholder={"키"}
+            width={"168px"}
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
+            type="number"
+            step="0.1"
+            error={errors.height}
+          />
+        </Box>
+
+        <TextStyle>{errors.username}</TextStyle>
+
         <CommonButton
-          width={"90px"}
-          height={"50px"}
-          fontSize={"16px"}
-          onClick={handleCheckUserName}
-          disabled={!username || isLoading}
+          width="346px"
+          onClick={handleSignUp}
+          disabled={!userNameAvailable}
         >
-          중복 확인
+          회원가입
         </CommonButton>
-      </Box>
-
-      <CommonTextField
-        type={"password"}
-        placeholder={"비밀번호"}
-        width={"346px"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={errors.password}
-      />
-      <CommonTextField
-        type={"password"}
-        placeholder={"비밀번호 확인"}
-        width={"346px"}
-        value={passwordCheck}
-        onChange={(e) => setPasswordCheck(e.target.value)}
-        error={errors.passwordCheck}
-      />
-
-      <Box>
-        <CommonTextField
-          placeholder={"이름"}
-          width={"228px"}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          error={errors.name}
-        />
-        <CommonButton
-          outline={gender === "남" ? false : true}
-          onClick={() => setGender("남")} // 성별 남 선택
-          {...ButtonProps}
-        >
-          남
-        </CommonButton>
-        <CommonButton
-          outline={gender === "여" ? false : true}
-          onClick={() => setGender("여")}
-          {...ButtonProps}
-        >
-          여
-        </CommonButton>
-      </Box>
-
-      <Box>
-        <CommonTextField
-          placeholder={"나이"}
-          width={"168px"}
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          type="number"
-          error={errors.age}
-        />
-        <CommonTextField
-          placeholder={"키"}
-          width={"168px"}
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
-          type="number"
-          step="0.1"
-          error={errors.height}
-        />
-      </Box>
-
-      <TextStyle>{errors.username}</TextStyle>
-
-      <CommonButton
-        width="346px"
-        onClick={handleSignUp}
-        disabled={!userNameAvailable}
-      >
-        회원가입
-      </CommonButton>
+      </RootIn>
 
       <CommonDialog
         open={dialogOpen}
