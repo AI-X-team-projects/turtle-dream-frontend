@@ -135,11 +135,15 @@ const MonthChart = () => {
                     return;
                 }
 
-                const transformedData = response.map(item => ({
-                    month: item.summaryDate.substring(5, 10),
-                    "좋은 자세": item.goodPostureCount ?? 0,
-                    "나쁜 자세": item.badPostureCount ?? 0,
-                }));
+                const transformedData = response.map(item => {
+                    // console.log("item:", item);
+                    return {
+                        month: item.summaryDate.substring(5, 10),
+                        "좋은 자세": item.goodPostureCount ?? 0,
+                        "나쁜 자세": item.badPostureCount ?? 0,
+                    }
+                    
+                });
 
                 setChartData(transformedData);
                 setError(null);
@@ -258,6 +262,7 @@ const MonthChart = () => {
                 </LeftBox>
                
                 <ChartBox>
+                    {/* 데이터가 없을 경우 "데이터가 없습니다" 문구 출력 */}
                     {chartData.length === 0 ? (
                         <Message>선택한 기간에 대한 데이터가 없습니다.</Message>
                     ) : (
@@ -272,6 +277,45 @@ const MonthChart = () => {
                             indexScale={{ type: "band", round: true }}
                             colors={["#3B604B", "#FFB6C1"]}
                             borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
+                            axisTop={null}
+                            axisRight={null}
+                            axisBottom={{
+                                tickSize: 5,
+                                tickPadding: 5,
+                                tickRotation: -45,
+                                legend: "날짜",
+                                legendPosition: "middle",
+                                legendOffset: 40,
+                            }}
+                            axisLeft={{
+                                tickSize: 5,
+                                tickPadding: 5,
+                                tickRotation: 0,
+                                legend: "횟수",
+                                legendPosition: "middle",
+                                legendOffset: -50,
+                            }}
+                            enableGridY={true}
+                            enableLabel={true}
+                            legends={[
+                                {
+                                    dataFrom: "keys",
+                                    anchor: "bottom-right",
+                                    direction: "column",
+                                    justify: false,
+                                    translateX: 120,
+                                    translateY: 0,
+                                    itemsSpacing: 2,
+                                    itemWidth: 100,
+                                    itemHeight: 20,
+                                    itemDirection: "left-to-right",
+                                    itemOpacity: 0.85,
+                                    symbolSize: 20,
+                                },
+                            ]}
+                            role="application"
+                            ariaLabel="월별 자세 분석"
+                            barAriaLabel={(e) => `${e.id}: ${e.formattedValue}회`}
                         />
                     )}
                 </ChartBox>
