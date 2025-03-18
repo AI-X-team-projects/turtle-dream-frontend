@@ -7,6 +7,7 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { ko } from "date-fns/locale";
 import { postureApi } from "../../api/postureApi";
+import TurtleImage from "../../assets/images/TurtleImage.svg";
 
 const Root = styled.div`
     width: 100%;
@@ -118,6 +119,7 @@ const MonthChart = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [advice, setAdvice] = useState("");
+    const [topBadPostureTimes, setTopBadPostureTimes] = useState([]);
 
     const userId = localStorage.getItem("username");
 
@@ -192,7 +194,76 @@ const MonthChart = () => {
         fetchAdvice();
         fetchMonthlyData();
         fetchBadPostureHours();
-    }, [userId, range]);      
+    }, [userId, range]);
+
+    useEffect(() => {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }, []);
+
+    useEffect(() => {
+        const fetchTopBadPostureTimes = async () => {
+            try {
+                const response = await postureApi.getTopBadPostureHours(userId);
+                if (!response || !Array.isArray(response)) {
+                    console.warn("서버 응답이 잘못되었습니다.", response);
+                    return;
+                }
+    
+                // 상위 3개 나쁜 자세 시간대 변환
+                const sortedTimes = response
+                    .sort((a, b) => b.count - a.count) // 나쁜 자세 횟수 기준 정렬
+                    .slice(0, 3) // 상위 3개 선택
+                    .map(item => {
+                        let hour = parseInt(item.time.split(":")[0], 10);
+                        hour = (hour + 9) % 24; // UTC → KST 변환
+                        return String(hour).padStart(2, "0") + ":00"; 
+                    });
+    
+                setTopBadPostureTimes(sortedTimes);
+            } catch (err) {
+                console.error("나쁜 자세 상위 시간대를 불러오는데 실패했습니다.", err);
+            }
+        };
+    
+        fetchTopBadPostureTimes();
+    }, [userId, range]);
+    
+
+    useEffect(() => {
+        let timeoutId;
+    
+        const checkAndSendNotification = () => {
+            if (!topBadPostureTimes.length) return;
+    
+            const now = new Date();
+            const currentHour = String(now.getHours()).padStart(2, "0") + ":00";
+            const today = now.toISOString().split("T")[0];
+    
+            if (topBadPostureTimes.includes(currentHour)) {
+                const notificationKey = `notified_${today}_${currentHour}`;
+    
+                if (!localStorage.getItem(notificationKey)) {
+                    if (Notification.permission === "granted") {
+                        new Notification("나쁜 자세 주의!", {
+                            body: `평균적으로 ${currentHour}시에 나쁜 자세를 많이 기록했습니다. 올바른 자세를 유지해보아요!`,
+                            icon: TurtleImage
+                        });
+    
+                        localStorage.setItem(notificationKey, "true");
+                    }
+                }
+            }
+    
+            // 1분 후 다시 실행
+            timeoutId = setTimeout(checkAndSendNotification, 60000);
+        };
+    
+        checkAndSendNotification(); // 첫 실행
+    
+        return () => clearTimeout(timeoutId); // 클린업
+    }, [topBadPostureTimes]);    
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
