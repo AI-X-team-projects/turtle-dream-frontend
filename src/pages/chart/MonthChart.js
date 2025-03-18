@@ -136,7 +136,6 @@ const MonthChart = () => {
                 }
 
                 const transformedData = response.map(item => {
-                    // console.log("item:", item);
                     return {
                         month: item.summaryDate.substring(5, 10),
                         "좋은 자세": item.goodPostureCount ?? 0,
@@ -193,7 +192,7 @@ const MonthChart = () => {
         fetchAdvice();
         fetchMonthlyData();
         fetchBadPostureHours();
-    }, [userId, range]);
+    }, [userId, range]);      
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -222,11 +221,21 @@ const MonthChart = () => {
                             
                         ) : (
                             <ResponsivePie
-                                data={topBadPostureHours.map(item => ({
-                                    id: item.time, // 시간대가 아이디
-                                    label: item.time, // 라벨
-                                    value: item["나쁜 자세 횟수"], // 나쁜 자세 횟수
-                                }))}
+                                data={topBadPostureHours.map(item => {
+                                    let hour = parseInt(item.time.split(":")[0], 10); // "1:00" → 1
+                            
+                                    // UTC → 한국 시간 변환 (UTC 1시는 KST 10시)
+                                    hour = (hour + 9) % 24;
+                            
+                                    // 24시간 형식 변환
+                                    const formattedHour = String(hour).padStart(2, "0") + ":00";
+                            
+                                    return {
+                                        id: formattedHour,
+                                        label: formattedHour,
+                                        value: item["나쁜 자세 횟수"],
+                                    };
+                                })}
                                 margin={{ top: 50, right: 80, bottom: 50, left: 80 }}
                                 innerRadius={0.5} // 도넛 모양
                                 padAngle={0.7}
