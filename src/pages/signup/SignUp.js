@@ -6,6 +6,7 @@ import CommonButton from "../../common/CommonButton";
 import { userApi } from "../../api/userApi";
 import { useNavigate } from "react-router-dom";
 import CommonDialog from "../../common/CommonDialog";
+import { ReactComponent as ArrowIcon } from "../../assets/images/ArrowIcon.svg";
 
 const Root = styled(CommonRoot)`
   & > input {
@@ -14,6 +15,22 @@ const Root = styled(CommonRoot)`
   & > button {
     margin-top: 14px;
   }
+`;
+
+const BackBox = styled.div`
+  width: 100%;
+  & svg {
+    transform: rotate(90deg);
+  }
+`;
+const BackText = styled.button`
+  margin: 8px 0 0;
+  font-size: ${(props) => props.theme.fontSize.sm};
+  color: ${(props) => props.theme.color.black};
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  border: 0px;
 `;
 
 const TitleStyle = styled.p`
@@ -61,8 +78,8 @@ const SignUp = () => {
   const [height, setHeight] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogMessage, setDialogMessage] = useState("")
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   const validateForm = () => {
@@ -236,8 +253,17 @@ const SignUp = () => {
     fontSize: "16px",
   };
 
+  const goToHome = () => {
+    navigate("/");
+  };
+
   return (
     <Root>
+      <BackBox>
+        <BackText onClick={goToHome}>
+          <ArrowIcon /> 홈으로 이동
+        </BackText>
+      </BackBox>
       <TitleStyle>회원가입</TitleStyle>
       <Box>
         <CommonTextField
@@ -319,9 +345,7 @@ const SignUp = () => {
         />
       </Box>
 
-      <TextStyle>
-        {errors.username}
-      </TextStyle>
+      <TextStyle>{errors.username}</TextStyle>
 
       <CommonButton
         width="346px"
