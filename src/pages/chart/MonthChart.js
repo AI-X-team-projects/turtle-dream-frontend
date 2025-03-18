@@ -135,11 +135,15 @@ const MonthChart = () => {
                     return;
                 }
 
-                const transformedData = response.map(item => ({
-                    month: item.summaryDate.substring(5, 10),
-                    "좋은 자세": item.goodPostureCount ?? 0,
-                    "나쁜 자세": item.badPostureCount ?? 0,
-                }));
+                const transformedData = response.map(item => {
+                    // console.log("item:", item);
+                    return {
+                        month: item.summaryDate.substring(5, 10),
+                        "좋은 자세": item.goodPostureCount ?? 0,
+                        "나쁜 자세": item.badPostureCount ?? 0,
+                    }
+                    
+                });
 
                 setChartData(transformedData);
                 setError(null);
@@ -218,16 +222,6 @@ const MonthChart = () => {
                             
                         ) : (
                             <ResponsivePie
-                                // data={[
-                                //     { id: "12 AM", label: "12 AM", value: 5 },
-                                //     { id: "3 AM", label: "3 AM", value: 8 },
-                                //     { id: "6 AM", label: "6 AM", value: 3 },
-                                //     { id: "9 AM", label: "9 AM", value: 12 },
-                                //     { id: "12 PM", label: "12 PM", value: 6 },
-                                //     { id: "3 PM", label: "3 PM", value: 7 },
-                                //     { id: "6 PM", label: "6 PM", value: 4 },
-                                //     { id: "9 PM", label: "9 PM", value: 9 },
-                                // ]}
                                 data={topBadPostureHours.map(item => ({
                                     id: item.time, // 시간대가 아이디
                                     label: item.time, // 라벨
@@ -237,8 +231,6 @@ const MonthChart = () => {
                                 innerRadius={0.5} // 도넛 모양
                                 padAngle={0.7}
                                 cornerRadius={3}
-                                // colors={["#3B604B", "#4A755C", "#5D8D6D", "#74A282", "#8CB897", "#A5D6A7"]}
-                                // colors={["#B22222", "#C0392B", "#D64545", "#E57373", "#F28B82", "#FFB6C1"]}
                                 colors={{ scheme: "red_yellow_blue" }} // 색상 스키마
                                 borderWidth={1}
                                 borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
@@ -258,6 +250,7 @@ const MonthChart = () => {
                 </LeftBox>
                
                 <ChartBox>
+                    {/* 데이터가 없을 경우 "데이터가 없습니다" 문구 출력 */}
                     {chartData.length === 0 ? (
                         <Message>선택한 기간에 대한 데이터가 없습니다.</Message>
                     ) : (
@@ -272,6 +265,45 @@ const MonthChart = () => {
                             indexScale={{ type: "band", round: true }}
                             colors={["#3B604B", "#FFB6C1"]}
                             borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
+                            axisTop={null}
+                            axisRight={null}
+                            axisBottom={{
+                                tickSize: 5,
+                                tickPadding: 5,
+                                tickRotation: -45,
+                                legend: "날짜",
+                                legendPosition: "middle",
+                                legendOffset: 40,
+                            }}
+                            axisLeft={{
+                                tickSize: 5,
+                                tickPadding: 5,
+                                tickRotation: 0,
+                                legend: "횟수",
+                                legendPosition: "middle",
+                                legendOffset: -50,
+                            }}
+                            enableGridY={true}
+                            enableLabel={true}
+                            legends={[
+                                {
+                                    dataFrom: "keys",
+                                    anchor: "bottom-right",
+                                    direction: "column",
+                                    justify: false,
+                                    translateX: 120,
+                                    translateY: 0,
+                                    itemsSpacing: 2,
+                                    itemWidth: 100,
+                                    itemHeight: 20,
+                                    itemDirection: "left-to-right",
+                                    itemOpacity: 0.85,
+                                    symbolSize: 20,
+                                },
+                            ]}
+                            role="application"
+                            ariaLabel="월별 자세 분석"
+                            barAriaLabel={(e) => `${e.id}: ${e.formattedValue}회`}
                         />
                     )}
                 </ChartBox>
