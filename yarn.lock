@@ -1869,7 +1869,7 @@
 
 "@nivo/pie@^0.88.0":
   version "0.88.0"
-  resolved "https://registry.npmjs.org/@nivo/pie/-/pie-0.88.0.tgz"
+  resolved "https://registry.yarnpkg.com/@nivo/pie/-/pie-0.88.0.tgz#628a608d077d9cfe850ffef1b16181482479e7c7"
   integrity sha512-BE6dFWlGne1SnaEkFHNbg0sZBiwtcIqBFwmMRJ0F11SiKOzVeJyq3KiyY1I2ySSCx5VR1V8/MNBXzXFu3vJMAQ==
   dependencies:
     "@nivo/arcs" "0.88.0"
