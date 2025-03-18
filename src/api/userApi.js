@@ -4,7 +4,7 @@ export const userApi = {
   // 회원가입
   register: async (userData) => {
     try {
-      const response = await axios.post("/api/user/register", userData);
+      const response = await axios.post("/api/user/signup", userData);
       return response.data;
     } catch (error) {
       console.error("회원가입 실패:", error.response?.data || error.message);
