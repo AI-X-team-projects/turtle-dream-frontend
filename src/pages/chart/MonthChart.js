@@ -123,6 +123,26 @@ const MonthChart = () => {
 
     const userId = localStorage.getItem("username");
 
+    //-------------------------------------------------------------------------------------------------------------
+    // 시연 영상 테스트용 알림
+    const hasNotified = useRef(false);
+
+    useEffect(() => {
+        if (hasNotified.current) return;
+        hasNotified.current = true;
+
+        const now = new Date();
+        const currentHour = String(now.getHours()).padStart(2, "0") + ":00";
+
+        setTimeout(() => {
+            new Notification("나쁜 자세 주의!", {
+                body: `평균적으로 ${currentHour}시에 나쁜 자세를 많이 기록했습니다. 올바른 자세를 유지해보아요!`,
+                icon: TurtleImage
+            });
+        }, 2000);
+    }, []);
+    //-------------------------------------------------------------------------------------------------------------
+
     useEffect(() => {
         const fetchMonthlyData = async () => {
             try {
@@ -268,32 +288,7 @@ const MonthChart = () => {
         checkAndSendNotification(); // 첫 실행
     
         return () => clearTimeout(timeoutId); // 클린업
-    }, [topBadPostureTimes]);    
-
-
-    //-------------------------------------------------------------------------------------------------------------
-    // 시연 영상 테스트용 알림
-    useEffect(() => {
-        const now = new Date();
-        const currentHour = String(now.getHours()).padStart(2, "0") + ":00";
-        const today = now.toISOString().split("T")[0];
-    
-        const notificationKey = `notified_${today}_${currentHour}`;
-        if (localStorage.getItem(notificationKey)) {
-            return;
-        }
-    
-        setTimeout(() => {
-            new Notification("나쁜 자세 주의!", {
-                body: `평균적으로 ${currentHour}시에 나쁜 자세를 많이 기록했습니다. 올바른 자세를 유지해보아요!`,
-                icon: TurtleImage
-            });
-    
-            localStorage.setItem(notificationKey, "true");
-        }, 2000);
-    }, []);
-    //-------------------------------------------------------------------------------------------------------------
-    
+    }, [topBadPostureTimes]);        
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
