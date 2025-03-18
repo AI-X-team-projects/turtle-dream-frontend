@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsivePie } from "@nivo/pie";
 import styled from "styled-components";
@@ -205,22 +205,27 @@ const MonthChart = () => {
     useEffect(() => {
         const fetchTopBadPostureTimes = async () => {
             try {
-                const response = await postureApi.getTopBadPostureHours(userId);
+                const startDate = range[0].startDate.toLocaleDateString("sv-SE");
+                const endDate = range[0].endDate.toLocaleDateString("sv-SE");
+        
+        
+                const response = await postureApi.getTopBadPostureHours(userId, startDate, endDate);
+        
                 if (!response || !Array.isArray(response)) {
-                    console.warn("서버 응답이 잘못되었습니다.", response);
+                    console.warn("서버 응답이 잘못되었습니다:", response);
                     return;
                 }
-    
-                // 상위 3개 나쁜 자세 시간대 변환
+        
                 const sortedTimes = response
-                    .sort((a, b) => b.count - a.count) // 나쁜 자세 횟수 기준 정렬
-                    .slice(0, 3) // 상위 3개 선택
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 3)
                     .map(item => {
-                        let hour = parseInt(item.time.split(":")[0], 10);
+                        let hour = parseInt(item.hour.split(":")[0], 10); // item.time → item.hour
                         hour = (hour + 9) % 24; // UTC → KST 변환
-                        return String(hour).padStart(2, "0") + ":00"; 
+                        return String(hour).padStart(2, "0") + ":00";
                     });
-    
+        
+        
                 setTopBadPostureTimes(sortedTimes);
             } catch (err) {
                 console.error("나쁜 자세 상위 시간대를 불러오는데 실패했습니다.", err);
@@ -264,6 +269,31 @@ const MonthChart = () => {
     
         return () => clearTimeout(timeoutId); // 클린업
     }, [topBadPostureTimes]);    
+
+
+    //-------------------------------------------------------------------------------------------------------------
+    // 시연 영상 테스트용 알림
+    useEffect(() => {
+        const now = new Date();
+        const currentHour = String(now.getHours()).padStart(2, "0") + ":00";
+        const today = now.toISOString().split("T")[0];
+    
+        const notificationKey = `notified_${today}_${currentHour}`;
+        if (localStorage.getItem(notificationKey)) {
+            return;
+        }
+    
+        setTimeout(() => {
+            new Notification("나쁜 자세 주의!", {
+                body: `평균적으로 ${currentHour}시에 나쁜 자세를 많이 기록했습니다. 올바른 자세를 유지해보아요!`,
+                icon: TurtleImage
+            });
+    
+            localStorage.setItem(notificationKey, "true");
+        }, 2000);
+    }, []);
+    //-------------------------------------------------------------------------------------------------------------
+    
 
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
