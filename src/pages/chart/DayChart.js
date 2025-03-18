@@ -111,61 +111,53 @@ const DayChart = () => {
       try {
         setIsLoading(true);
         const response = await postureApi.getDailyPosture(userId, today);
-
+        // console.log("API 응답 데이터:", response);
+    
         if (!response || !Array.isArray(response)) {
-          console.error("서버 응답이 올바르지 않습니다.", response);
-          setChartData([]); // 오류 발생 방지
+          console.warn("서버 응답이 올바르지 않음:", response);
+          setChartData([]);
           return;
         }
-
-        // 사용자가 설정한 시작 시간과 종료 시간 반영
+    
         const groupedData = {};
         for (let hour = startHour; hour <= endHour; hour++) {
           groupedData[`${hour}시`] = 0;
         }
-
+    
         response.forEach((item) => {
           if (!item.recordedAt) return;
-
-          const hour = parseInt(
-            item.recordedAt.split("T")[1]?.substring(0, 2),
-            10
-          );
+    
+          const recordedAt = item.recordedAt ?? "2000-01-01T00:00:00";
+          const hour = parseInt(recordedAt.split("T")[1]?.substring(0, 2), 10);
+    
           if (hour >= startHour && hour <= endHour) {
             const hourLabel = `${hour}시`;
-            if (!groupedData[hourLabel]) {
-              groupedData[hourLabel] = 0;
-            }
-            groupedData[hourLabel] += item.badPostureDuration || 0;
+            groupedData[hourLabel] = (groupedData[hourLabel] || 0) + (item.badPostureDuration || 0);
           }
         });
-
+    
         const transformedData = [
           {
             id: "나쁜 자세 횟수",
             color: "#3B604B",
             data: Object.keys(groupedData)
               .map((hour) => ({
-                x: hour,
-                y: groupedData[hour],
+                x: hour ?? "Unknown",  // undefined 방지
+                y: groupedData[hour] ?? 0,
               }))
-              .sort((a, b) => parseInt(a.x) - parseInt(b.x)), // 시간 순 정렬
-          },
+              .filter(d => d.x !== undefined) // undefined 데이터 제거
+              .sort((a, b) => parseInt(a.x) - parseInt(b.x)),
+          }
         ];
-
-        // 데이터가 비어 있을 경우 빈 배열 설정 (오류 방지)
-        if (!transformedData[0]?.data.length) {
-          console.warn("변환된 데이터가 비어 있음", transformedData);
+    
+        // console.log("변환된 차트 데이터:", transformedData);
+        
+        if (!transformedData[0]?.data?.length) {
+          console.warn("변환된 데이터가 비어 있음:", transformedData);
           setChartData([]);
           return;
         }
-
-        const maxDataValue = Math.max(
-          ...transformedData[0].data.map((d) => d.y),
-          200
-        );
-        setMaxYValue(maxDataValue + 100);
-
+    
         setChartData(transformedData);
         setError(null);
       } catch (err) {
@@ -175,6 +167,7 @@ const DayChart = () => {
         setIsLoading(false);
       }
     };
+    
 
     const fetchAdvice = async () => {
       try {
@@ -228,59 +221,64 @@ const DayChart = () => {
       </Controls>
 
       <ChartBox>
-        <ResponsiveLine
-          data={chartData}
-          margin={{ top: 30, right: 100, bottom: 50, left: 60 }}
-          xScale={{ type: "point" }}
-          yScale={{
-            type: "linear",
-            min: 0,
-            max: maxYValue,
-            stacked: false,
-            reverse: false,
-          }}
-          curve="monotoneX"
-          axisTop={null}
-          axisRight={null}
-          axisBottom={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: -45,
-            legendOffset: 50,
-            legendPosition: "middle",
-          }}
-          axisLeft={{
-            tickSize: 5,
-            tickPadding: 5,
-            legendOffset: -46,
-            legendPosition: "middle",
-          }}
-          enableGridX={true}
-          enableGridY={true}
-          pointSize={4}
-          pointColor="#3B604B"
-          pointBorderWidth={2}
-          pointBorderColor="#3B604B"
-          pointLabelYOffset={-12}
-          enableArea={true}
-          areaBaselineValue={0}
-          areaOpacity={0.15}
-          useMesh={true}
-          colors={["#3B604B"]}
-          tooltip={({ point }) => (
-            <div
-              style={{
-                background: "white",
-                padding: "9px 12px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-              }}
-            >
-              <strong>{point.data.x}</strong>
-              <div>나쁜 자세: {point.data.y}회</div>
-            </div>
-          )}
-        />
+      {chartData.length > 0 && chartData[0]?.data?.length > 0 ? (
+      <ResponsiveLine
+        data={chartData}
+        margin={{ top: 30, right: 100, bottom: 50, left: 60 }}
+        xScale={{ type: "point" }}
+        yScale={{
+          type: "linear",
+          min: 0,
+          max: maxYValue,
+          stacked: false,
+          reverse: false,
+        }}
+        curve="monotoneX"
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: -45,
+          legendOffset: 50,
+          legendPosition: "middle",
+        }}
+        axisLeft={{
+          tickSize: 5,
+          tickPadding: 5,
+          legendOffset: -46,
+          legendPosition: "middle",
+        }}
+        enableGridX={true}
+        enableGridY={true}
+        pointSize={4}
+        pointColor="#3B604B"
+        pointBorderWidth={2}
+        pointBorderColor="#3B604B"
+        pointLabelYOffset={-12}
+        enableArea={true}
+        areaBaselineValue={0}
+        areaOpacity={0.15}
+        useMesh={true}
+        colors={["#3B604B"]}
+        tooltip={({ point }) => (
+          <div
+            style={{
+              background: "white",
+              padding: "9px 12px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+            }}
+          >
+            <strong>{point.data.x}</strong>
+            <div>나쁜 자세: {point.data.y}회</div>
+          </div>
+        )}
+      />
+    ) : (
+      <div>차트 데이터가 없습니다.</div>
+    )}
+
       </ChartBox>
       <TextBoxStyle>
         <TitleStyle>나쁜 자세 분석</TitleStyle>

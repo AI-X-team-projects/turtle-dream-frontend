@@ -222,16 +222,6 @@ const MonthChart = () => {
                             
                         ) : (
                             <ResponsivePie
-                                // data={[
-                                //     { id: "12 AM", label: "12 AM", value: 5 },
-                                //     { id: "3 AM", label: "3 AM", value: 8 },
-                                //     { id: "6 AM", label: "6 AM", value: 3 },
-                                //     { id: "9 AM", label: "9 AM", value: 12 },
-                                //     { id: "12 PM", label: "12 PM", value: 6 },
-                                //     { id: "3 PM", label: "3 PM", value: 7 },
-                                //     { id: "6 PM", label: "6 PM", value: 4 },
-                                //     { id: "9 PM", label: "9 PM", value: 9 },
-                                // ]}
                                 data={topBadPostureHours.map(item => ({
                                     id: item.time, // 시간대가 아이디
                                     label: item.time, // 라벨
@@ -241,8 +231,6 @@ const MonthChart = () => {
                                 innerRadius={0.5} // 도넛 모양
                                 padAngle={0.7}
                                 cornerRadius={3}
-                                // colors={["#3B604B", "#4A755C", "#5D8D6D", "#74A282", "#8CB897", "#A5D6A7"]}
-                                // colors={["#B22222", "#C0392B", "#D64545", "#E57373", "#F28B82", "#FFB6C1"]}
                                 colors={{ scheme: "red_yellow_blue" }} // 색상 스키마
                                 borderWidth={1}
                                 borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
